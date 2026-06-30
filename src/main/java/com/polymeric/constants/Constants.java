@@ -14,25 +14,17 @@ public interface Constants {
 
     public static final String HTTPS = "https://";
     
-    public static final String APP_PACKAGE_NAME = "mergePay";
+    public static final String APP_PACKAGE_NAME = "worldpayPolymeric";
                 
 	String  SUCCESS="操作成功";
 	
-	String ERROR = "操作失败，请稍后再试";
+	String ERROR = "系统繁忙，请稍后再试！！！";
 	
-	String  SUCCESS_EN="success";
+	String ID_CARD = "idCard";
 	
 	String  API_RES_W="SUCCESS";
 	
-	String  API_RES_F="FAIL";
-	
 	String  API_RES_E="ERROR";
-	
-	String NULL_CONTETN="没有相关数据";
-	
-	String HTTP_RES_CODE_200_VALUE = "操作成功";
-	
-	String EXCEPTION_MSG = "系统繁忙，请稍后再试！！！";
 	
 	String ADMIN_STR = "admin";
 			
@@ -104,6 +96,5 @@ public interface Constants {
     
     public static final String DEFAULT_PASSWORD = "qwer1234";
     
-    public static final String PARAM = "OnePay下单测试0001123";
 
 }

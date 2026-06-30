@@ -8,6 +8,8 @@ public enum ErrorCodeEnum {
     APPID_STATE_ERROR(2003, "AppId不存在！！！"),
     SECRET_KEY_ERROR(2002, "SecretKey错误！！！"),
     IP_ERROR(2100, "IP地址没有访问权限！！！"),
+    UID_ERROR(3001, "uid不正确"),
+    UID_NULL(3002, "请添加uid请求头参数"),
     CHANNEL_NULL(4002, "渠道信息未配置！！！"),
     CHANNEL_STATUS_ERROR(4003, "渠道状态异常！！！");
 

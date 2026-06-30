@@ -12,7 +12,8 @@ public enum SignHeardEnums {
 	NONCE(2, "nonce"),
 	TIMESTAMP(3, "timestamp"),
 	VERSION(4, "version"),
-	SIGN(5, "sign");
+	SIGN(5, "sign"),
+	UID(6, "uid");
 	
 
 	private Integer index;

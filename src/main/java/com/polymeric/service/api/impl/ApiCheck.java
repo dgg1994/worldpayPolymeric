@@ -32,149 +32,150 @@ import com.polymeric.utils.sign.RsaVerifyUtil;
 @Transactional
 @CrossOrigin
 public class ApiCheck extends BaseApiService {
-	
+
 	private static MerchantsUserDao merchantsUserDao;
-    private static MerchantsInfoDao merchantsInfoDao;
-    private static MerchantsKeyDao merchantsKeyDao;
-    private static MerchantsIpDao merchantsIpDao;
-    private static ChannelInfoDao channelInfoDao;
-    private static IpUtil ipUtil;
+	private static MerchantsInfoDao merchantsInfoDao;
+	private static MerchantsKeyDao merchantsKeyDao;
+	private static MerchantsIpDao merchantsIpDao;
+	private static ChannelInfoDao channelInfoDao;
+	private static IpUtil ipUtil;
 
-    @Autowired
-    public void setMerchantsInfoDao(MerchantsInfoDao merchantsInfoDao) {
-        ApiCheck.merchantsInfoDao = merchantsInfoDao;
-    }
+	@Autowired
+	public void setMerchantsInfoDao(MerchantsInfoDao merchantsInfoDao) {
+		ApiCheck.merchantsInfoDao = merchantsInfoDao;
+	}
 
-    @Autowired
-    public void setMerchantsKeyDao(MerchantsKeyDao merchantsKeyDao) {
-        ApiCheck.merchantsKeyDao = merchantsKeyDao;
-    }
+	@Autowired
+	public void setMerchantsKeyDao(MerchantsKeyDao merchantsKeyDao) {
+		ApiCheck.merchantsKeyDao = merchantsKeyDao;
+	}
 
-    @Autowired
-    public void setMerchantsIpDao(MerchantsIpDao merchantsIpDao) {
-        ApiCheck.merchantsIpDao = merchantsIpDao;
-    }
+	@Autowired
+	public void setMerchantsIpDao(MerchantsIpDao merchantsIpDao) {
+		ApiCheck.merchantsIpDao = merchantsIpDao;
+	}
 
-    @Autowired
-    public void setChannelInfoDao(ChannelInfoDao channelInfoDao) {
-        ApiCheck.channelInfoDao = channelInfoDao;
-    }
+	@Autowired
+	public void setChannelInfoDao(ChannelInfoDao channelInfoDao) {
+		ApiCheck.channelInfoDao = channelInfoDao;
+	}
 
-    @Autowired
-    public void setMerchantsUserDao(MerchantsUserDao merchantsUserDao) {
-        ApiCheck.merchantsUserDao = merchantsUserDao;
-    }
-    
-    @Autowired
-    public void setIpUtil(IpUtil ipUtil) {
-        ApiCheck.ipUtil = ipUtil;
-    }
+	@Autowired
+	public void setMerchantsUserDao(MerchantsUserDao merchantsUserDao) {
+		ApiCheck.merchantsUserDao = merchantsUserDao;
+	}
 
-    /**
-     * @category 前置校验（商户、白名单、时间戳超时、幂等、签名）
-     * @param request HttpServletRequest
-     * @param requestBody 请求体对象
-     * @return ResponseBase
-     */
-    public static <T> ResponseBase checkHeader(HttpServletRequest request, T requestBody) {
-        // 获取请求头appid
-        String appid = request.getHeader(SignHeardEnums.APPID.getName());
-        MerchantsInfoEntity infoEntity = merchantsInfoDao.findByAppId(appid);
-        if (infoEntity == null) {
-            return setResultError(ErrorCodeEnum.APPID_ERROR.getCode(), I18nUtil.getMessage("Appid_error"));
-        }
-        if (!UserStateEnums.NORMAL.getIndex().equals(infoEntity.getMerchantsStatus())) {
-            return setResultError(ErrorCodeEnum.APPID_STATE_ERROR.getCode(), I18nUtil.getMessage("appid_state_error"));
-        }
-        // 查询是否绑定渠道
-        ChannelInfoEntity channelInfoEntity = channelInfoDao.selectById(infoEntity.getChannelId());
-        if (channelInfoEntity == null) {
-            return setResultError(ErrorCodeEnum.CHANNEL_NULL.getCode(), I18nUtil.getMessage("channel_null"));
-        }
-        if (!UserStateEnums.NORMAL.getIndex().equals(channelInfoEntity.getChannelState())) {
-            return setResultError(ErrorCodeEnum.CHANNEL_STATUS_ERROR.getCode(), I18nUtil.getMessage("channel_statue_error"));
-        }
-        // 获取请求头uid
-        String uid = request.getHeader(SignHeardEnums.UID.getName());
-        MerchantsUserEntity userEntity = null;
-        if(uid != null) {
-        	userEntity = merchantsUserDao.findByUid(uid);
-        	if(userEntity == null || !userEntity.getMchAppid().equals(infoEntity.getAppId())) {
-        		return setResultError(ErrorCodeEnum.UID_ERROR.getCode(), I18nUtil.getMessage("uid_error"));
-        	}
-        }
-        // 查询appid对应商户公钥
-        MerchantsKeyEntity keyEntity = merchantsKeyDao.findAppId(appid);
-        if (keyEntity == null) {
-            return setResultError(ErrorCodeEnum.APPID_ERROR.getCode(), I18nUtil.getMessage("Appid_error"));
-        }
-        if (keyEntity.getPrivateKey() == null || keyEntity.getPrivateKey().isEmpty()
-                || keyEntity.getPublicKey() == null || keyEntity.getPublicKey().isEmpty()) {
-            return setResultError(I18nUtil.getMessage("secretKey_error"));
-        }
-        // IP白名单控制
-        String ipAddress = ipUtil.getClientIp(request);
-        System.out.println(ipAddress);
-        MerchantsIpEntity ipEntity = merchantsIpDao.findAppIdIp(appid, ipAddress);
-        if (ipEntity == null) {
-            return setResultError(ErrorCodeEnum.IP_ERROR.getCode(), I18nUtil.getMessage("ip_error"));
-        }
-        // 获取请求头时间戳
-        // String timestamp = request.getHeader(SignHeardEnums.TIMESTAMP.getName());
-        // 校验到期时间
-        // boolean timestampState = RsaVerifyUtil.validateTimestamp(timestamp);
-        // if(!timestampState) {
-        //     return setResultError(ErrorCodeEnum.TIMESTAMP_ERROR.getCode(), I18nUtil.getMessage("timestamp_error"));
-        // }
-        // 获取请求头随机数
-        // String nonce = request.getHeader(SignHeardEnums.NONCE.getName());
-        // 校验随机字符，幂等处理
-        // boolean nonceState = RsaVerifyUtil.validateNonce(appid, nonce);
-        // if(!nonceState) {
-        //     return setResultError(ErrorCodeEnum.NONCE_ERROR.getCode(), I18nUtil.getMessage("nonce_error"));
-        // }
-        // 获取请求头签名
-        // String sign = request.getHeader(SignHeardEnums.SIGN.getName());
-        // 构建原始签名
-        // String newSign = RsaVerifyUtil.buildSignString(appid, nonce, timestamp, JSON.toJSONString(requestBody));
-        // 签名校验
-        // boolean signState = RsaVerifyUtil.verifySign(newSign, sign, keyEntity.getPublicKey());
-        // if(!signState) {
-        //     return setResultError(ErrorCodeEnum.SIGN_ERROR.getCode(), I18nUtil.getMessage("sign_error"));
-        // }
+	@Autowired
+	public void setIpUtil(IpUtil ipUtil) {
+		ApiCheck.ipUtil = ipUtil;
+	}
 
-        infoEntity.setChannelData(channelInfoEntity);
-        infoEntity.setMerchantsKey(keyEntity);
-        infoEntity.setMerchantsUserData(userEntity);
-        return setResultSuccess(infoEntity);
-    }
+	/**
+	 * @category 前置校验（商户、白名单、时间戳超时、幂等、签名）
+	 * @param request     HttpServletRequest
+	 * @param requestBody 请求体对象
+	 * @return ResponseBase
+	 */
+	public static <T> ResponseBase checkHeader(HttpServletRequest request, T requestBody) {
+		// 获取请求头appid
+		String appid = request.getHeader(SignHeardEnums.APPID.getName());
+		MerchantsInfoEntity infoEntity = merchantsInfoDao.findByAppId(appid);
+		if (infoEntity == null) {
+			return setResultError(ErrorCodeEnum.APPID_ERROR.getCode(), I18nUtil.getMessage("Appid_error"));
+		}
+		if (!UserStateEnums.NORMAL.getIndex().equals(infoEntity.getMerchantsStatus())) {
+			return setResultError(ErrorCodeEnum.APPID_STATE_ERROR.getCode(), I18nUtil.getMessage("appid_state_error"));
+		}
+		// 查询是否绑定渠道
+		ChannelInfoEntity channelInfoEntity = channelInfoDao.selectById(infoEntity.getChannelId());
+		if (channelInfoEntity == null) {
+			return setResultError(ErrorCodeEnum.CHANNEL_NULL.getCode(), I18nUtil.getMessage("channel_null"));
+		}
+		if (!UserStateEnums.NORMAL.getIndex().equals(channelInfoEntity.getChannelState())) {
+			return setResultError(ErrorCodeEnum.CHANNEL_STATUS_ERROR.getCode(),
+					I18nUtil.getMessage("channel_statue_error"));
+		}
+		// 获取请求头uid
+		String uid = request.getHeader(SignHeardEnums.UID.getName());
+		MerchantsUserEntity userEntity = null;
+		if (uid != null) {
+			userEntity = merchantsUserDao.findByUid(uid);
+			if (userEntity == null || !userEntity.getMchAppid().equals(infoEntity.getAppId())) {
+				return setResultError(ErrorCodeEnum.UID_ERROR.getCode(), I18nUtil.getMessage("uid_error"));
+			}
+		}
+		// 查询appid对应商户公钥
+		MerchantsKeyEntity keyEntity = merchantsKeyDao.findAppId(appid);
+		if (keyEntity == null) {
+			return setResultError(ErrorCodeEnum.APPID_ERROR.getCode(), I18nUtil.getMessage("Appid_error"));
+		}
+		if (keyEntity.getPrivateKey() == null || keyEntity.getPrivateKey().isEmpty() || keyEntity.getPublicKey() == null
+				|| keyEntity.getPublicKey().isEmpty()) {
+			return setResultError(I18nUtil.getMessage("secretKey_error"));
+		}
+		// IP白名单控制
+		String ipAddress = ipUtil.getClientIp(request);
+		MerchantsIpEntity ipEntity = merchantsIpDao.findAppIdIp(appid, ipAddress);
+		if (ipEntity == null) {
+			return setResultError(ErrorCodeEnum.IP_ERROR.getCode(), I18nUtil.getMessage("ip_error"));
+		}
+//		// 获取请求头时间戳
+//		String timestamp = request.getHeader(SignHeardEnums.TIMESTAMP.getName());
+//		// 校验到期时间
+//		boolean timestampState = RsaVerifyUtil.validateTimestamp(timestamp);
+//		if (!timestampState) {
+//			return setResultError(ErrorCodeEnum.TIMESTAMP_ERROR.getCode(), I18nUtil.getMessage("timestamp_error"));
+//		}
+//		// 获取请求头随机数
+//		String nonce = request.getHeader(SignHeardEnums.NONCE.getName());
+//		// 校验随机字符，幂等处理
+//		boolean nonceState = RsaVerifyUtil.validateNonce(appid, nonce);
+//		if (!nonceState) {
+//			return setResultError(ErrorCodeEnum.NONCE_ERROR.getCode(), I18nUtil.getMessage("nonce_error"));
+//		}
+//		// 获取请求头签名
+//		String sign = request.getHeader(SignHeardEnums.SIGN.getName());
+//		// 构建原始签名
+//		String newSign = RsaVerifyUtil.buildSignString(appid, nonce, timestamp, JSON.toJSONString(requestBody));
+//		// 签名校验
+//		boolean signState = RsaVerifyUtil.verifySign(newSign, sign, keyEntity.getPublicKey());
+//		if (!signState) {
+//			return setResultError(ErrorCodeEnum.SIGN_ERROR.getCode(), I18nUtil.getMessage("sign_error"));
+//		}
 
-    /**
-     * 获取渠道配置（含默认值）
-     * @param channelEntity 渠道信息
-     * @param defaultApiUrl 接口地址
-     * @param defaultAppId appid
-     * @param defaultPrivateKey 验签私钥
-     * @param defaultAesKey 加密密盐
-     * @param method 
-     * @return
-     */
-    public static UnifiedConfig getConfig(ChannelInfoEntity channelEntity, String defaultApiUrl,
-            String defaultAppId, String defaultPrivateKey, String defaultAesKey, String method) {
-        UnifiedConfig config = new UnifiedConfig();
-        // 接口地址
-        String aprUrl = channelEntity.getApiUrl() == null ? defaultApiUrl : channelEntity.getApiUrl();
-        // appId
-        String appId = channelEntity.getAppId() == null ? defaultAppId : channelEntity.getAppId();
-        // 验签私钥
-        String privateKey = channelEntity.getPrivateKey() == null ? defaultPrivateKey : channelEntity.getPrivateKey();
-        // 加密密盐
-        String aesKey = channelEntity.getAesKey() == null ? defaultAesKey : channelEntity.getAesKey();
+		infoEntity.setChannelData(channelInfoEntity);
+		infoEntity.setMerchantsKey(keyEntity);
+		infoEntity.setMerchantsUserData(userEntity);
+		return setResultSuccess(infoEntity);
+	}
 
-        config.setAesKey(aesKey);
-        config.setAppId(appId);
-        config.setAprUrl(aprUrl + method);
-        config.setRsaPrivateKey(privateKey);
-        return config;
-    }
+	/**
+	 * 获取渠道配置（含默认值）
+	 * 
+	 * @param channelEntity     渠道信息
+	 * @param defaultApiUrl     接口地址
+	 * @param defaultAppId      appid
+	 * @param defaultPrivateKey 验签私钥
+	 * @param defaultAesKey     加密密盐
+	 * @param method
+	 * @return
+	 */
+	public static UnifiedConfig getConfig(ChannelInfoEntity channelEntity, String defaultApiUrl, String defaultAppId,
+			String defaultPrivateKey, String defaultAesKey, String method) {
+		UnifiedConfig config = new UnifiedConfig();
+		// 接口地址
+		String aprUrl = channelEntity.getApiUrl() == null ? defaultApiUrl : channelEntity.getApiUrl();
+		// appId
+		String appId = channelEntity.getAppId() == null ? defaultAppId : channelEntity.getAppId();
+		// 验签私钥
+		String privateKey = channelEntity.getPrivateKey() == null ? defaultPrivateKey : channelEntity.getPrivateKey();
+		// 加密密盐
+		String aesKey = channelEntity.getAesKey() == null ? defaultAesKey : channelEntity.getAesKey();
+
+		config.setAesKey(aesKey);
+		config.setAppId(appId);
+		config.setAprUrl(aprUrl + method);
+		config.setRsaPrivateKey(privateKey);
+		return config;
+	}
 }

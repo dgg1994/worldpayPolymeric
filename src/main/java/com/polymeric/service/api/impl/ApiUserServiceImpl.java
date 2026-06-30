@@ -136,4 +136,40 @@ public class ApiUserServiceImpl extends BaseApiService implements ApiUserService
 		return base;
 	}
 
+	@Override
+	public ResponseBase kycStatus(HttpServletRequest request) {
+		try {
+			ResponseBase base = ApiCheck.checkHeader(request, null);
+			if(!Constants.HTTP_RES_CODE_200.equals(base.getCode())) {
+				return base;
+			}
+			MerchantsInfoEntity infoEntity = JSONObject.parseObject(JSON.toJSONString(base.getData()), MerchantsInfoEntity.class);
+			if(ChannelCodeEnums.POLO.getCode().equals(infoEntity.getChannelCode())) {
+				return this.polokycStatus(infoEntity);
+			}else {
+				return setResultError(ErrorCodeEnum.CHANNEL_NULL.getCode(), I18nUtil.getMessage("channel_null"));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
+	}
+
+	public ResponseBase polokycStatus(MerchantsInfoEntity infoEntity) {
+		// 获取上游配置
+		UnifiedConfig config = ApiCheck.getConfig(
+				infoEntity.getChannelData(), 
+				PoloConfig.API_URL, 
+				PoloConfig.APP_ID,
+				PoloConfig.RSA_PRIVATE_KEY, 
+				PoloConfig.AES_KEY, 
+				PoloMethods.KYC_STATUS);
+		if (infoEntity.getMerchantsUserData() == null) {
+		    return setResultError(ErrorCodeEnum.UID_NULL.getCode(), I18nUtil.getMessage("uid_null"));
+		}
+		// 调用三方接口
+		ResponseBase base = ApiPoloUtil.postData(infoEntity.getMerchantsUserData().getApiUid(), null, null, config);
+		return base;
+	}
+
 }

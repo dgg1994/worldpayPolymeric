@@ -2,6 +2,7 @@ package com.polymeric.service.api;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -23,5 +24,9 @@ public interface ApiUserService {
 	@PostMapping("/kyc/country/list")
 	@ApiOperation(value = "KYC国家列表", notes = "KYC国家列表", response = ResponseBase.class)
 	ResponseBase kycCountryList(HttpServletRequest request, ApiKycCountryQuery kycCountryQuery);
+	
+	@GetMapping("/kyc/status")
+	@ApiOperation(value = "查询KYC状态", notes = "查询KYC状态", response = ResponseBase.class)
+	ResponseBase kycStatus(HttpServletRequest request);
 
 }

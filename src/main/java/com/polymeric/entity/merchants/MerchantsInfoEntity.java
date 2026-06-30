@@ -91,4 +91,8 @@ public class MerchantsInfoEntity extends PageQueryHelperEntity{
 	@ApiModelProperty(name = "channelData",value = "绑定上游渠道信息",required = false,dataType = "channelData")
 	private ChannelInfoEntity channelData;
 	
+	@TableField(exist = false)
+	@ApiModelProperty(name = "merchantsUserData",value = "商户用户信息",required = false,dataType = "merchantsUserData")
+	private MerchantsUserEntity merchantsUserData;
+	
 }

@@ -248,6 +248,7 @@ public class ApiPoloUtil extends BaseApiService {
     public static ResponseBase postFormFile(String uId, String filedName, File file,UnifiedConfig config) throws IOException {
         try {
             String url = config.getAprUrl();
+            log.info("请求地址：{}", url);
             // 1. 生成随机数和时间戳
             String nonce = generateNonce();
             String timestamp = String.valueOf(System.currentTimeMillis());

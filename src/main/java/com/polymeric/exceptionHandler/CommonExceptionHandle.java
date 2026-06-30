@@ -146,6 +146,6 @@ public class CommonExceptionHandle extends BaseApiService {
     public ResponseBase exceptionHandler(Exception e, HttpServletRequest request) {
         // 打印异常堆栈，方便排查
         e.printStackTrace();
-        return setResultError(Constants.EXCEPTION_MSG);
+        return setResultError(Constants.ERROR);
     }
 }
