@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.polymeric.entity.channel.ChannelInfoEntity;
 import com.polymeric.query.pub.PageQueryHelperEntity;
 
 import io.swagger.annotations.ApiModel;
@@ -85,5 +86,9 @@ public class MerchantsInfoEntity extends PageQueryHelperEntity{
 	@TableField(exist = false)
 	@ApiModelProperty(name = "merchantsKey",value = "商户密钥配置",required = false,dataType = "MerchantsKeyEntity")
 	private MerchantsKeyEntity merchantsKey;
+	
+	@TableField(exist = false)
+	@ApiModelProperty(name = "channelData",value = "绑定上游渠道信息",required = false,dataType = "channelData")
+	private ChannelInfoEntity channelData;
 	
 }

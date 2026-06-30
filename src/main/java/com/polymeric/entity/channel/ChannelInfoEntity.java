@@ -34,6 +34,10 @@ public class ChannelInfoEntity extends PageQueryHelperEntity{
 	@ApiModelProperty(name = "channelState",value = "渠道状态",required = true,dataType = "String")
     private Integer channelState;
 	
+	@TableField("api_url")
+	@ApiModelProperty(name = "apiUrl",value = "接口请求地址",required = true,dataType = "String")
+    private String apiUrl;
+	
 	@TableField("private_key")
 	@ApiModelProperty(name = "privateKey",value = "验证私钥",required = true,dataType = "String")
     private String privateKey;
@@ -42,13 +46,9 @@ public class ChannelInfoEntity extends PageQueryHelperEntity{
 	@ApiModelProperty(name = "appId",value = "appId",required = true,dataType = "String")
     private String appId;
 	
-	@TableField("aes_Key")
-	@ApiModelProperty(name = "aesKe",value = "aesKe",required = true,dataType = "String")
-    private String aesKe;
-	
-	@TableField("webhook_url")
-	@ApiModelProperty(name = "webhookUrl",value = "回调地址",required = true,dataType = "String")
-    private String webhookUrl;
+	@TableField("aes_key")
+	@ApiModelProperty(name = "aesKey",value = "aesKe",required = true,dataType = "String")
+    private String aesKey;
 	
 	@TableField("setTime")
 	@ApiModelProperty(name = "setTime",value = "注册时间",required = false,dataType = "Date")
