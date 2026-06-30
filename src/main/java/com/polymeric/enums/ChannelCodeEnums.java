@@ -16,7 +16,7 @@ public enum ChannelCodeEnums {
 
 	private String name;
 
-	private ChannelCodeEnums(Integer index, String code, String value) {
+	private ChannelCodeEnums(Integer index, String code, String name) {
 		this.index = index;
 		this.code = code;
 		this.name = name;

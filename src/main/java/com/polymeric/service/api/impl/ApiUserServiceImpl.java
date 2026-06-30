@@ -22,6 +22,7 @@ import com.polymeric.entity.merchants.MerchantsInfoEntity;
 import com.polymeric.entity.merchants.MerchantsUserEntity;
 import com.polymeric.enums.ChannelCodeEnums;
 import com.polymeric.enums.ErrorCodeEnum;
+import com.polymeric.pubapi.query.user.ApiKycCountryQuery;
 import com.polymeric.pubapi.query.user.ApiRegisterQuery;
 import com.polymeric.response.polo.PoloRegisterRes;
 import com.polymeric.service.api.ApiUserService;
@@ -44,10 +45,10 @@ public class ApiUserServiceImpl extends BaseApiService implements ApiUserService
 	public ResponseBase register(HttpServletRequest request,@Valid @RequestBody ApiRegisterQuery registerQuery) {
 		try {
 			ResponseBase base = apiCheck.checkHeader(request, registerQuery);
-			if(Constants.HTTP_RES_CODE_200.equals(base.getCode())) {
+			if(!Constants.HTTP_RES_CODE_200.equals(base.getCode())) {
 				return base;
 			}
-			MerchantsInfoEntity infoEntity = JSONObject.parseObject(JSON.toJSONString(base), MerchantsInfoEntity.class);
+			MerchantsInfoEntity infoEntity = JSONObject.parseObject(JSON.toJSONString(base.getData()), MerchantsInfoEntity.class);
 			if(ChannelCodeEnums.POLO.getCode().equals(infoEntity.getChannelCode())) {
 				return this.poloRegister(infoEntity,registerQuery);
 			}else {
@@ -97,6 +98,45 @@ public class ApiUserServiceImpl extends BaseApiService implements ApiUserService
 			e.printStackTrace();
 			throw new RuntimeException();
 		}
+	}
+
+	@Override
+	public ResponseBase kycCountryList(HttpServletRequest request,@Valid @RequestBody ApiKycCountryQuery kycCountryQuery) {
+		try {
+			ResponseBase base = apiCheck.checkHeader(request, kycCountryQuery);
+			if(!Constants.HTTP_RES_CODE_200.equals(base.getCode())) {
+				return base;
+			}
+			MerchantsInfoEntity infoEntity = JSONObject.parseObject(JSON.toJSONString(base.getData()), MerchantsInfoEntity.class);
+			if(ChannelCodeEnums.POLO.getCode().equals(infoEntity.getChannelCode())) {
+				return this.poloKycCountryList(infoEntity,kycCountryQuery);
+			}else {
+				return setResultError(ErrorCodeEnum.CHANNEL_NULL.getCode(), I18nUtil.getMessage("channel_null"));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
+	}
+	
+	/**
+	 * @category polo kyc国家列表查询
+	 * @param infoEntity
+	 * @param kycCountryQuery
+	 * @return
+	 */
+	public ResponseBase poloKycCountryList(MerchantsInfoEntity infoEntity,@Valid ApiKycCountryQuery kycCountryQuery) {
+		//获取上游配置
+		UnifiedConfig config= apiCheck.getConfig(
+				infoEntity.getChannelData(), 
+				PoloConfig.API_URL,
+				PoloConfig.APP_ID,
+				PoloConfig.RSA_PRIVATE_KEY,
+				PoloConfig.AES_KEY,
+				PoloMethods.KYC_COUNTRY_LIST);
+		//调用三方接口
+		ResponseBase base = ApiPoloUtil.postData(null, null, kycCountryQuery, config);
+		return base;
 	}
 
 }
