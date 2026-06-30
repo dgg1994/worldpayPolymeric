@@ -1,0 +1,102 @@
+server: 
+   servlet.context-path: /worldpayPolymeric
+   port: 8015
+   max-http-header-size: 2MB
+   tomcat.max-http-form-post-size: 50MB
+   
+spring:
+  application:
+    name: worldpayPolymeric
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  servlet:
+    multipart:
+      max-file-size: 255MB
+      max-request-size: 255MB
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+  # MySQL 数据源配置
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://16.163.6.237:3306/worldpay_polymeric?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
+    username: worldpay_polymeric
+    password: m7sw4zsJSjemDPZa
+    type: com.alibaba.druid.pool.DruidDataSource
+    initialSize: 30
+    minIdle: 30
+    maxActive: 50
+    maxWait: 100000
+    timeBetweenEvictionRunsMillis: 30000  # 改为30秒
+    minEvictableIdleTimeMillis: 50000     # 改为50秒（小于60秒）
+    validationQuery: SELECT 1
+    testWhileIdle: true
+    testOnBorrow: true   # 获取连接时验证，保证拿到的连接可用
+    testOnReturn: false
+    connectionErrorRetryAttempts: 3
+    breakAfterAcquireFailure: false
+    
+# Redis数据库索引（默认为0）
+  redis: 
+     database: 0
+     timeout: 5000  #连接超时时间（毫秒）
+     host: 127.0.0.1  #Redis服务器地址
+     port: 6379  #Redis服务器连接端口
+     jedis: 
+        pool: 
+           max-active: 8  #连接池最大连接数（使用负值表示没有限制）
+           max-wait: -1  #连接池最大阻塞等待时间（使用负值表示没有限制）
+           max-idle: 8   #连接池中的最大空闲连接
+           min-idle: 0   #连接池中的最小空闲连接
+
+bank:
+  gatewayUrl: https://open-api-dev-card.zeabur.app/openapi
+  appId: b9a5a8a269604cdcaa03858b78708360
+  appSecret: b635dd5c87f7bf73387929203321b1e1
+  rsaPrivateKey: MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCIZjhByuXbB7lkk5j62BFyCtP/M0XVPeDkTd9O+pWu5RhbNcs4cigSi6+Iz5Ipa7VsK4JZ64EcXgfBdf8cAEI6mg2ZM27qta5jflsPB5aMwT72rU5aYAz++xRVGrZyW3oE/XVr8CYaegRsh4G620srt0C7hIOdkUFfu1Ovq8EvotlbB3J5q2CjG1lvt0rkbi3Jtn3dJ/2iy8FuE4lkEJqNL8hCXfFPg/6rRvB2A8ccIhFcS8XQPCa6aZovzuHWXvI68mqeqAfstM8pETFux5KdD5GkvWPbhxW8CYxkGwWvA9ozkwNtN+c/Q3UueNDvaTOMcbyrYgZgh4EfCzQ3QwxrAgMBAAECggEAaf8Nvsse/qws/STaIC0iuX4CqvI8VW9FwgVmAOkowwYTfGX8a/wCeg8FNQshaYDjNpFFNf2WkuXbnxLEUg09am7nHGPk0Q6o23aI6tAZxX4zIN0i44Z68vdJIK2mlI3T7+bLhjrUUYT6xSA0x3G9I9a/vjlHUn5b0Dox2XVeplYDowWVl/sU4kZnOjkB/guEP9vAQkRVqPznNEwYWOW/jqgJBDwzWCd0P5eAyJCvJ15nlCLAEYcLdw2IPlQH4Ty6zjX4opQ2pY7HCVY0WcEbTXkAS/typqvz2R20+TxNF6Ct2r4q9iEEUYsId0HQJmmEL3fAfC0ItWv7VzWa6RHm2QKBgQC8zJ58hSRaGiayCjO3wjEgTKsMRGvuWjCdqhpNL1QcDap6Qc3QuxNe+NSOCSNwGQqPwEOWOWluSn5iNcudLCTmvLC/2p0fcb2wX9Q8N9B0vId778H5rD26AnKrq37gB4cpIBbCwLID+Qx+nc17wZvToLiX6XyhTip0B7v1jLvJVQKBgQC48up2kCXTpNJdaWxpO1BMTyBsmFWjUMbFCcLvPmHC+ToZJ/hyT4f9kEwcKb5gZDaNBa8+fdxFY0MILzFgUKEj7s7wyeY850BYSOw426J1VQL3YvWPhZCxen9l6VD+Hs9Oe24wjp/2rJW0Xkf61ahJD1O0+JkXbbGE+DhjYdB+vwKBgHTYbn3CKO1aofguODPSC3Vh/bpp3iJ1zwDE9eIvGG8ERi3D7AzyutpcRbBiF3yZAuBUrX+bqJSJpg5CHPH5EB19SiZytitvyWYO6Nsb7/dPdspNaE+NOeaU/UMhsDQWdKAPLAb8GzA6QnFaWIHvIPGo1pWt+2QZbEzDPKCLqOzBAoGAIOe3J1kGId2VP+Fd1GslIi6BylBgDCp28t+FuyMSKapF1+vwnAXiYA6oO+qBYIzz16tHPosOAZpjdrVOx6AQy1/VmamSOQu7uvlebc9F3DI/0NvebKaK08jDmdIlAtFgeMolFKaLd0vFZs3PaKVSx4zei7gfJLfzeYDgJ25jtekCgYAp0hr/tdGxqmbxTGz8LX4uwpaCdGtHXNcRRW51Yau6UD/ecozP63U5QTbE4ZGceC1CTwZ/ZdsORzXQ3666+GcUbsJP8ixaG2QqseK6gWt2OScIeDFrB6yoh+5MVkLCjTd8ag7OTtuAunS3uzgA0uabfpBL21Wb0M0MmX78Fmd+Ng==
+  aesKey: cvGWYbem1CmjD+0x4Ju5qQChRrc0eiMHz7XkgAw1RtU=
+
+#邮件发送
+yunmail:
+  host: smtp.ezmail.vip  # 改为正确的 SMTP 服务器
+  port: 465              # 或尝试 587（如果465不行）
+  username: support@1token.me #账号
+  password: "Aasd147258!@#$"  # 用引号包裹
+  sendeName: OneToken #发件人名称
+  # 可选：添加以下配置
+  auth: true
+  ssl:
+    enable: true
+    
+#飞机消息   
+telegram:
+   mornitor_bot_token: ''
+   notice_group_id: ''
+
+s3:
+  file_bucket: onetokenapp
+  access_key: AKIARG6IBZE2EI55IR7Z
+  secret_key: 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
+  aws_region: ap-east-1
+
+#是否开启IP白名单、谷歌验证码验证
+dscoins:
+  login:
+    ipLimit:
+      enable: false
+    googleLimit:
+      enable: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
