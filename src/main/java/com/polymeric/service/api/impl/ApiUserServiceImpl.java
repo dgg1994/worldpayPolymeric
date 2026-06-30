@@ -36,15 +36,12 @@ import com.polymeric.utils.sign.ApiPoloUtil;
 public class ApiUserServiceImpl extends BaseApiService implements ApiUserService{
 	
 	@Autowired
-	private ApiCheck apiCheck;
-	
-	@Autowired
 	private MerchantsUserDao merchantsUserDao;
 
 	@Override
 	public ResponseBase register(HttpServletRequest request,@Valid @RequestBody ApiRegisterQuery registerQuery) {
 		try {
-			ResponseBase base = apiCheck.checkHeader(request, registerQuery);
+			ResponseBase base = ApiCheck.checkHeader(request, registerQuery);
 			if(!Constants.HTTP_RES_CODE_200.equals(base.getCode())) {
 				return base;
 			}
@@ -69,7 +66,7 @@ public class ApiUserServiceImpl extends BaseApiService implements ApiUserService
 	public ResponseBase poloRegister(MerchantsInfoEntity infoEntity, @Valid ApiRegisterQuery registerQuery) {
 		try {
 			//获取上游配置
-			UnifiedConfig config= apiCheck.getConfig(
+			UnifiedConfig config= ApiCheck.getConfig(
 					infoEntity.getChannelData(), 
 					PoloConfig.API_URL,
 					PoloConfig.APP_ID,
@@ -103,7 +100,7 @@ public class ApiUserServiceImpl extends BaseApiService implements ApiUserService
 	@Override
 	public ResponseBase kycCountryList(HttpServletRequest request,@Valid @RequestBody ApiKycCountryQuery kycCountryQuery) {
 		try {
-			ResponseBase base = apiCheck.checkHeader(request, kycCountryQuery);
+			ResponseBase base = ApiCheck.checkHeader(request, kycCountryQuery);
 			if(!Constants.HTTP_RES_CODE_200.equals(base.getCode())) {
 				return base;
 			}
@@ -127,7 +124,7 @@ public class ApiUserServiceImpl extends BaseApiService implements ApiUserService
 	 */
 	public ResponseBase poloKycCountryList(MerchantsInfoEntity infoEntity,@Valid ApiKycCountryQuery kycCountryQuery) {
 		//获取上游配置
-		UnifiedConfig config= apiCheck.getConfig(
+		UnifiedConfig config= ApiCheck.getConfig(
 				infoEntity.getChannelData(), 
 				PoloConfig.API_URL,
 				PoloConfig.APP_ID,

@@ -34,12 +34,12 @@ public class BaseApiService {
     }
 
     //返回成功，可传data值
-    public ResponseBase setResultSuccess(Object data) {
+    public static ResponseBase setResultSuccess(Object data) {
         return setResult(Constants.HTTP_RES_CODE_200, Constants.HTTP_RES_CODE_200_VALUE, data);
     }
 
     //返回成功，没有data值
-    public ResponseBase setResultSuccess() {
+    public static ResponseBase setResultSuccess() {
         return setResult(Constants.HTTP_RES_CODE_200, Constants.HTTP_RES_CODE_200_VALUE, null);
     }
 
