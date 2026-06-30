@@ -6,12 +6,12 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Strings;
 import com.polymeric.base.BaseApiService;
 import com.polymeric.base.ResponseBase;
+import com.polymeric.config.channel.UnifiedConfig;
 import com.polymeric.constants.Constants;
 import com.polymeric.response.pub.ApiResponseEntity;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -25,11 +25,7 @@ import java.util.*;
 
 @Slf4j
 @Component
-public class ApiPoplCardApi extends BaseApiService {
-
-    private static String GATEWAY;
-    private static String APP_ID;
-    private static String RSA_PRIVATE_KEY;
+public class ApiPoloUtil extends BaseApiService {
 
 	public static final int NOTIFY_TIMEOUT = 30000;//响应超时时间
 
@@ -39,23 +35,6 @@ public class ApiPoplCardApi extends BaseApiService {
     public static String proxyAddress = "127.0.0.1";
     public static int proxyPort = 7070;
     
-
-    @Value("${bank.gatewayUrl}")
-    public void setGateway(String gateway) {
-        ApiPoplCardApi.GATEWAY = gateway;
-    }
-
-    @Value("${bank.appId}")
-    public void setAppId(String appId) {
-        ApiPoplCardApi.APP_ID = appId;
-    }
-
-    @Value("${bank.rsaPrivateKey}")
-    public void setRsaPrivateKey(String rsaPrivateKey) {
-        ApiPoplCardApi.RSA_PRIVATE_KEY = rsaPrivateKey;
-    }
-
-
     /**
      * 生成32位随机数
      */
@@ -204,23 +183,21 @@ public class ApiPoplCardApi extends BaseApiService {
         return result;
     }
 
-    /**
-     * POST请求
-     */
-    public static ResponseBase postData(String uId, String method, Object object, String requestOrderId) {
+    
+    public static ResponseBase postData(String uId, String requestOrderId, Object object,UnifiedConfig config) {
         try {
         	
-            String url = GATEWAY + method;
+            String url = config.getAprUrl();
             log.info("请求地址：{}", url);
             String nonce = generateNonce();
             String timestamp = String.valueOf(System.currentTimeMillis());
             // 1. 构建签名字符串
-            String signStr = buildSignString(APP_ID, nonce, timestamp, object);
+            String signStr = buildSignString(config.getAppId(), nonce, timestamp, object);
             // 2. RSA签名
-            String sign = rsaSign(signStr, RSA_PRIVATE_KEY);
+            String sign = rsaSign(signStr, config.getRsaPrivateKey());
             // 3. 构建HTTP请求
             HttpRequest httpRequest = HttpRequest.post(url)
-                    .header("appId", APP_ID)
+                    .header("appId", config.getAppId())
                     .header("nonce", nonce)
                     .header("timestamp", timestamp)
                     .header("sign", sign)
@@ -268,16 +245,16 @@ public class ApiPoplCardApi extends BaseApiService {
     /**
      * 文件上传方法
      */
-    public static ResponseBase postFormFile(String uId, String filedName, File file, String method) throws IOException {
+    public static ResponseBase postFormFile(String uId, String filedName, File file,UnifiedConfig config) throws IOException {
         try {
-            String url = GATEWAY + method;
+            String url = config.getAprUrl();
             // 1. 生成随机数和时间戳
             String nonce = generateNonce();
             String timestamp = String.valueOf(System.currentTimeMillis());
             
             // 2. 构建签名参数（只包含需要签名的字段）
             TreeMap<String, Object> signMap = new TreeMap<>();
-            signMap.put("appId", APP_ID);
+            signMap.put("appId", config.getAppId());
             signMap.put("nonce", nonce);
             signMap.put("timestamp", timestamp);
             // 注意：uid 不参与签名，只放在header中
@@ -299,13 +276,13 @@ public class ApiPoplCardApi extends BaseApiService {
             log.info("文件上传签名原文: {}", signStr);
             
             // 4. RSA签名
-            String sign = rsaSign(signStr, RSA_PRIVATE_KEY);
+            String sign = rsaSign(signStr, config.getRsaPrivateKey());
             log.info("文件上传sign: {}", sign);
             
             // 5. 构建HTTP请求（保持原有结构，只增加必要的header）
             HttpRequest httpRequest = HttpRequest.post(url)
                     .form(filedName, file)
-                    .header("appId", APP_ID)
+                    .header("appId", config.getAppId())
                     .header("nonce", nonce)
                     .header("timestamp", timestamp)
                     .header("sign", sign)
