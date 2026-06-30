@@ -1,0 +1,26 @@
+# 敏感配置文件
+src/main/resources/application.yml
+src/main/resources/application-*.yml
+*.properties
+
+# IDE
+.idea/
+.settings/
+.vscode/
+*.iml
+.classpath
+.project
+
+# Build
+target/
+*.class
+*.jar
+*.war
+
+# Logs
+*.log
+startup.log
+
+# OS
+.DS_Store
+Thumbs.db

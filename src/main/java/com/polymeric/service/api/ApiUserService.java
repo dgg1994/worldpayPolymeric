@@ -1,0 +1,22 @@
+package com.polymeric.service.api;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.polymeric.base.ResponseBase;
+import com.polymeric.pubapi.query.user.ApiRegisterQuery;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
+@RequestMapping("/api/user")
+@Api(value = "用户管理",tags = "用户管理")
+public interface ApiUserService {
+	
+	@PostMapping("/register")
+	@ApiOperation(value = "用户注册", notes = "用户注册", response = ResponseBase.class)
+	ResponseBase register(HttpServletRequest request, ApiRegisterQuery registerQuery);
+
+}
