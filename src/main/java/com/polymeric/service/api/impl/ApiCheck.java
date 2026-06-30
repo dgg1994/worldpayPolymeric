@@ -62,6 +62,14 @@ public class ApiCheck extends BaseApiService{
 	    if(!UserStateEnums.NORMAL.getIndex().equals(infoEntity.getMerchantsStatus())) {
 	    	return setResultError(ErrorCodeEnum.APPID_STATE_ERROR.getCode(), I18nUtil.getMessage("appid_state_error"));
 	    }
+	    //查询是否绑定渠道
+	    ChannelInfoEntity channelInfoEntity = channelInfoDao.selectById(infoEntity.getChannelId());
+	    if(channelInfoEntity == null) {
+	    	return setResultError(ErrorCodeEnum.CHANNEL_NULL.getCode(), I18nUtil.getMessage("channel_null"));
+	    }
+	    if(!UserStateEnums.NORMAL.getIndex().equals(channelInfoEntity.getChannelState())) {
+	    	return setResultError(ErrorCodeEnum.CHANNEL_STATUS_ERROR.getCode(), I18nUtil.getMessage("channel_statue_error"));
+	    }
 	    // 查询appid对应商户公钥
 	    MerchantsKeyEntity keyEntity = merchantsKeyDao.findAppId(appid);
 	    if(keyEntity == null) {
@@ -73,38 +81,35 @@ public class ApiCheck extends BaseApiService{
 	    }
 	    // IP白名单控制
 	    String ipAddress = ipUtil.getClientIp(request);
+	    System.out.println(ipAddress);
 	    MerchantsIpEntity ipEntity = merchantsIpDao.findAppIdIp(appid, ipAddress);
 	    if(ipEntity == null) {
 	        return setResultError(ErrorCodeEnum.IP_ERROR.getCode(), I18nUtil.getMessage("ip_error"));
 	    }
-	    // 获取请求头时间戳
-	    String timestamp = request.getHeader(SignHeardEnums.TIMESTAMP.getName());
-	    // 校验到期时间
-	    boolean timestampState = RsaVerifyUtil.validateTimestamp(timestamp);
-	    if(!timestampState) {
-	        return setResultError(ErrorCodeEnum.TIMESTAMP_ERROR.getCode(), I18nUtil.getMessage("timestamp_error"));
-	    }
-	    // 获取请求头随机数
-	    String nonce = request.getHeader(SignHeardEnums.NONCE.getName());
-	    // 校验随机字符，幂等处理
-	    boolean nonceState = RsaVerifyUtil.validateNonce(appid, nonce);
-	    if(!nonceState) {
-	        return setResultError(ErrorCodeEnum.NONCE_ERROR.getCode(), I18nUtil.getMessage("nonce_error"));
-	    }
-	    // 获取请求头签名
-	    String sign = request.getHeader(SignHeardEnums.SIGN.getName());
-	    // 构建原始签名
-	    String newSign = RsaVerifyUtil.buildSignString(appid, nonce, timestamp, JSON.toJSONString(requestBody));
-	    // 签名校验
-	    boolean signState = RsaVerifyUtil.verifySign(newSign, sign, keyEntity.getPublicKey());
-	    if(!signState) {
-	        return setResultError(ErrorCodeEnum.SIGN_ERROR.getCode(), I18nUtil.getMessage("sign_error"));
-	    }
-	    //查询是否绑定渠道
-	    ChannelInfoEntity channelInfoEntity = channelInfoDao.selectById(infoEntity.getChannelId());
-	    if(channelInfoEntity == null) {
-	    	return setResultError(ErrorCodeEnum.CHANNEL_NULL.getCode(), I18nUtil.getMessage("channel_null"));
-	    }
+//	    // 获取请求头时间戳
+//	    String timestamp = request.getHeader(SignHeardEnums.TIMESTAMP.getName());
+//	    // 校验到期时间
+//	    boolean timestampState = RsaVerifyUtil.validateTimestamp(timestamp);
+//	    if(!timestampState) {
+//	        return setResultError(ErrorCodeEnum.TIMESTAMP_ERROR.getCode(), I18nUtil.getMessage("timestamp_error"));
+//	    }
+//	    // 获取请求头随机数
+//	    String nonce = request.getHeader(SignHeardEnums.NONCE.getName());
+//	    // 校验随机字符，幂等处理
+//	    boolean nonceState = RsaVerifyUtil.validateNonce(appid, nonce);
+//	    if(!nonceState) {
+//	        return setResultError(ErrorCodeEnum.NONCE_ERROR.getCode(), I18nUtil.getMessage("nonce_error"));
+//	    }
+//	    // 获取请求头签名
+//	    String sign = request.getHeader(SignHeardEnums.SIGN.getName());
+//	    // 构建原始签名
+//	    String newSign = RsaVerifyUtil.buildSignString(appid, nonce, timestamp, JSON.toJSONString(requestBody));
+//	    // 签名校验
+//	    boolean signState = RsaVerifyUtil.verifySign(newSign, sign, keyEntity.getPublicKey());
+//	    if(!signState) {
+//	        return setResultError(ErrorCodeEnum.SIGN_ERROR.getCode(), I18nUtil.getMessage("sign_error"));
+//	    }
+	    
 	    infoEntity.setChannelData(channelInfoEntity);
 	    infoEntity.setMerchantsKey(keyEntity);
 	    return setResultSuccess(infoEntity);
