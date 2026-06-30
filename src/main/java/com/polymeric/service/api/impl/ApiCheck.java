@@ -10,9 +10,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSON;
 import com.polymeric.base.BaseApiService;
 import com.polymeric.base.ResponseBase;
+import com.polymeric.config.channel.UnifiedConfig;
+import com.polymeric.dao.channel.ChannelInfoDao;
 import com.polymeric.dao.merchants.MerchantsInfoDao;
 import com.polymeric.dao.merchants.MerchantsIpDao;
 import com.polymeric.dao.merchants.MerchantsKeyDao;
+import com.polymeric.entity.channel.ChannelInfoEntity;
 import com.polymeric.entity.merchants.MerchantsInfoEntity;
 import com.polymeric.entity.merchants.MerchantsIpEntity;
 import com.polymeric.entity.merchants.MerchantsKeyEntity;
@@ -36,6 +39,9 @@ public class ApiCheck extends BaseApiService{
 	
 	@Autowired
 	private MerchantsIpDao merchantsIpDao;
+	
+	@Autowired
+	private ChannelInfoDao channelInfoDao;
 	
 	@Autowired
 	private IpUtil ipUtil;
@@ -94,8 +100,43 @@ public class ApiCheck extends BaseApiService{
 	    if(!signState) {
 	        return setResultError(ErrorCodeEnum.SIGN_ERROR.getCode(), I18nUtil.getMessage("sign_error"));
 	    }
+	    //查询是否绑定渠道
+	    ChannelInfoEntity channelInfoEntity = channelInfoDao.selectById(infoEntity.getChannelId());
+	    if(channelInfoEntity == null) {
+	    	return setResultError(ErrorCodeEnum.CHANNEL_NULL.getCode(), I18nUtil.getMessage("channel_null"));
+	    }
+	    infoEntity.setChannelData(channelInfoEntity);
 	    infoEntity.setMerchantsKey(keyEntity);
 	    return setResultSuccess(infoEntity);
+	}
+	
+	/**
+	 * 获取渠道配置（含默认值）
+	 * @param channelEntity 渠道信息
+	 * @param defaultApiUrl 接口地址
+	 * @param defaultAppId appid
+	 * @param defaultPrivateKey 验签私钥
+	 * @param defaultAesKey 加密密盐
+	 * @param method 
+	 * @return
+	 */
+	public UnifiedConfig getConfig(ChannelInfoEntity channelEntity, String defaultApiUrl,
+			String defaultAppId,String defaultPrivateKey,String defaultAesKey, String method) {
+		UnifiedConfig config = new UnifiedConfig();
+		//接口地址
+		String aprUrl = channelEntity.getApiUrl() == null ? defaultApiUrl :channelEntity.getApiUrl();
+		//appId
+		String appId = channelEntity.getAppId() == null ? defaultAppId: channelEntity.getAppId();
+		//验签私钥
+		String privateKey = channelEntity.getPrivateKey() == null ? defaultPrivateKey : channelEntity.getPrivateKey();
+		//加密密盐
+		String aesKey = channelEntity.getAesKey() == null ? defaultAesKey : channelEntity.getAesKey();
+		
+	    config.setAesKey(aesKey);
+	    config.setAppId(appId);
+	    config.setAprUrl(aprUrl+method);
+	    config.setRsaPrivateKey(privateKey);
+	    return config;
 	}
 
 }
