@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
+
+import com.alibaba.fastjson.JSON;
 import com.polymeric.base.BaseApiService;
 import com.polymeric.base.ResponseBase;
 import com.polymeric.config.channel.UnifiedConfig;
@@ -13,10 +15,12 @@ import com.polymeric.dao.channel.ChannelInfoDao;
 import com.polymeric.dao.merchants.MerchantsInfoDao;
 import com.polymeric.dao.merchants.MerchantsIpDao;
 import com.polymeric.dao.merchants.MerchantsKeyDao;
+import com.polymeric.dao.merchants.MerchantsUserDao;
 import com.polymeric.entity.channel.ChannelInfoEntity;
 import com.polymeric.entity.merchants.MerchantsInfoEntity;
 import com.polymeric.entity.merchants.MerchantsIpEntity;
 import com.polymeric.entity.merchants.MerchantsKeyEntity;
+import com.polymeric.entity.merchants.MerchantsUserEntity;
 import com.polymeric.enums.ErrorCodeEnum;
 import com.polymeric.enums.SignHeardEnums;
 import com.polymeric.enums.UserStateEnums;
@@ -28,7 +32,8 @@ import com.polymeric.utils.sign.RsaVerifyUtil;
 @Transactional
 @CrossOrigin
 public class ApiCheck extends BaseApiService {
-    
+	
+	private static MerchantsUserDao merchantsUserDao;
     private static MerchantsInfoDao merchantsInfoDao;
     private static MerchantsKeyDao merchantsKeyDao;
     private static MerchantsIpDao merchantsIpDao;
@@ -55,6 +60,11 @@ public class ApiCheck extends BaseApiService {
         ApiCheck.channelInfoDao = channelInfoDao;
     }
 
+    @Autowired
+    public void setMerchantsUserDao(MerchantsUserDao merchantsUserDao) {
+        ApiCheck.merchantsUserDao = merchantsUserDao;
+    }
+    
     @Autowired
     public void setIpUtil(IpUtil ipUtil) {
         ApiCheck.ipUtil = ipUtil;
@@ -83,6 +93,15 @@ public class ApiCheck extends BaseApiService {
         }
         if (!UserStateEnums.NORMAL.getIndex().equals(channelInfoEntity.getChannelState())) {
             return setResultError(ErrorCodeEnum.CHANNEL_STATUS_ERROR.getCode(), I18nUtil.getMessage("channel_statue_error"));
+        }
+        // 获取请求头uid
+        String uid = request.getHeader(SignHeardEnums.UID.getName());
+        MerchantsUserEntity userEntity = null;
+        if(uid != null) {
+        	userEntity = merchantsUserDao.findByUid(uid);
+        	if(userEntity == null || !userEntity.getMchAppid().equals(infoEntity.getAppId())) {
+        		return setResultError(ErrorCodeEnum.UID_ERROR.getCode(), I18nUtil.getMessage("uid_error"));
+        	}
         }
         // 查询appid对应商户公钥
         MerchantsKeyEntity keyEntity = merchantsKeyDao.findAppId(appid);
@@ -126,6 +145,7 @@ public class ApiCheck extends BaseApiService {
 
         infoEntity.setChannelData(channelInfoEntity);
         infoEntity.setMerchantsKey(keyEntity);
+        infoEntity.setMerchantsUserData(userEntity);
         return setResultSuccess(infoEntity);
     }
 
