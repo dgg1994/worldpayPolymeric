@@ -19,5 +19,8 @@ public interface PoloMethods {
     
     //用户卡列表信息
     public static String USER_CARD_LIST= "/bankcard/user/card/list";
+    
+    //用户卡列表信息
+    public static String MERCHANT_TEMPLATE_LIST= "/bankcard/merchant/template/list";
 
 }

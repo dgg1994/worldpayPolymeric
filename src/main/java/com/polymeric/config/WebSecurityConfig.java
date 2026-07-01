@@ -71,6 +71,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		        //会话创建策略：无状态
 		        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 		        .authorizeRequests()
+		        .antMatchers("/**").permitAll()
                 //druid放行
 		        .antMatchers("/statistics/**").permitAll()
                 .antMatchers("/druid/**").permitAll()
@@ -85,8 +86,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers( "/*.html","/**/*.html","/**/*.css", "/**/*.js","/webSocket/**").permitAll()
                 .antMatchers("/api/**").permitAll()
                 .antMatchers("/webhook/**").permitAll()
-                .antMatchers("/telegram/**").permitAll()
-                .antMatchers("/merchants/webhookTest").permitAll()
                 //其余所有请求需要身份认证
                 .anyRequest().authenticated()
                 .and()

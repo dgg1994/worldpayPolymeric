@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.polymeric.entity.merchants.MerchantsCardEntity;
-import com.polymeric.response.polo.PoloMerchantBankcardRes;
+import com.polymeric.response.api.PoloMerchantBankcardRes;
 
 @Repository
 public interface MerchantsCardDao extends BaseMapper<MerchantsCardEntity>{

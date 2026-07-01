@@ -1,4 +1,4 @@
-package com.polymeric.pubapi.query.user;
+package com.polymeric.query.api;
 
 import lombok.Data;
 

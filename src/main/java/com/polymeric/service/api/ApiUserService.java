@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.polymeric.base.ResponseBase;
-import com.polymeric.pubapi.query.user.ApiKycApplyQuery;
-import com.polymeric.pubapi.query.user.ApiKycCountryQuery;
-import com.polymeric.pubapi.query.user.ApiRegisterQuery;
+import com.polymeric.query.api.ApiKycApplyQuery;
+import com.polymeric.query.api.ApiKycCountryQuery;
+import com.polymeric.query.api.ApiRegisterQuery;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

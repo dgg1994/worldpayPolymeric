@@ -23,6 +23,14 @@ public class MerchantsCardEntity extends PageQueryHelperEntity{
 	@ApiModelProperty(name = "id",value = "主键",required = true,dataType = "Integer")
     private Integer id;
 	
+	@TableField("card_title")
+	@ApiModelProperty(name = "cardTitle",value = "卡标题名称",required = true,dataType = "String")
+	private String cardTitle;
+	
+	@TableField("card_img")
+	@ApiModelProperty(name = "cardImg",value = "银行卡图片",required = true,dataType = "String")
+	private String cardImg;
+	
 	@TableField("mch_id")
 	@ApiModelProperty(name = "mchId",value = "商户id",required = true,dataType = "String")
     private Integer mchId;

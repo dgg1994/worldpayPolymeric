@@ -22,7 +22,7 @@ import com.polymeric.entity.merchants.MerchantsInfoEntity;
 import com.polymeric.enums.ChannelCodeEnums;
 import com.polymeric.enums.ErrorCodeEnum;
 import com.polymeric.enums.PublicEnums;
-import com.polymeric.response.polo.PoloMerchantBankcardRes;
+import com.polymeric.response.api.PoloMerchantBankcardRes;
 import com.polymeric.service.api.ApiBankCardService;
 import com.polymeric.utils.I18nUtil;
 import com.polymeric.utils.sign.ApiPoloUtil;

@@ -1,17 +1,22 @@
 package com.polymeric.response.polo;
 
 import java.math.BigDecimal;
+
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-
+/**
+ * @category 银行卡信息
+ * @author Hlin
+ *
+ */
 @Data
-public class PoloMerchantBankcardRes {
+public class MerchantBankcardRes {
 	
-	@ApiModelProperty(name = "mchAppid",value = "商户编号",required = true,dataType = "String")
-    private String mchAppid;
+	@ApiModelProperty(name = "id",value = "卡片id",required = true,dataType = "String")
+    private Integer id;
 
-	@ApiModelProperty(name = "cardId",value = "三方卡片id",required = true,dataType = "String")
-	private Integer cardId;
+	@ApiModelProperty(name = "title",value = "标题",required = true,dataType = "String")
+	private String title;
 	
 	@ApiModelProperty(name = "cardBin",value = "关联BIN码",required = true,dataType = "String")
 	private String cardBin;
