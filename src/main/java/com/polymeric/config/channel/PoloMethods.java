@@ -16,5 +16,8 @@ public interface PoloMethods {
     
     //提交KYC信息
     public static String KYC_APPLY= "/user/kyc/apply";
+    
+    //用户卡列表信息
+    public static String USER_CARD_LIST= "/bankcard/user/card/list";
 
 }

@@ -2,8 +2,8 @@ package com.polymeric.enums;
 
 public enum PublicEnums {
 	ZERO(0, "0"),
-	ONE(1, "1"),//未激活
-	TOW(2, "2"),//已激活
+	ONE(1, "1"),//上架中
+	TOW(2, "2"),//下架中
 	THREE(3, "3"),
 	FOUR(4, "4"),
 	ONE_HUNDRED(100, "100");

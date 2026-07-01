@@ -34,109 +34,53 @@ public class ChannelCardEntity extends PageQueryHelperEntity{
 	@ApiModelProperty(name = "cardId",value = "三方卡片id",required = true,dataType = "String")
 	private Integer cardId;
 	
-	@TableField("apply_discount")
-	@ApiModelProperty(value = "申请折扣，实际申请费用 = applyDiscount * applyFee")
-	private Integer applyDiscount;
-
-	@TableField("apply_fee")
-	@ApiModelProperty(value = "申请费用（美元），每次申请卡时从商户基本账户扣除")
-	private BigDecimal applyFee;
-
-	@TableField("bankcard_nature")
-	@ApiModelProperty(value = "卡片性质：PHYSICAL（实体卡）或 VIRTUAL（虚拟卡）")
-	private String bankCardNature;
-
-	@TableField("bankcard_source")
-	@ApiModelProperty(value = "银行卡来源")
-	private String bankCardSource;
-
-	@TableField("bankcard_type")
-	@ApiModelProperty(value = "卡片类型：MASTER 或 VISA")
-	private String bankCardType;
-	
-	@TableField("card_brand")
-	@ApiModelProperty(value = "卡片类型：MASTER 或 VISA")
-	private String cardBrand;
-
-	@TableField("category_id")
-	@ApiModelProperty(value = "分类ID")
-	private Integer categoryId;
-
-	@TableField("card_ccy")
-	@ApiModelProperty(value = "卡币种，例如 USD")
-	private String cardCcy;
-
-	@TableField("card_description1")
-	@ApiModelProperty(value = "卡片描述1")
-	private String cardDescription1;
-
-	@TableField("card_description2")
-	@ApiModelProperty(value = "卡片描述2")
-	private String cardDescription2;
-
-	@TableField("card_enable")
-	@ApiModelProperty(value = "是否允许申请")
-	private Boolean cardEnable;
-
-	@TableField("card_hot")
-	@ApiModelProperty(value = "是否热门卡片")
-	private Boolean cardHot;
-	
-	@TableField("card_img")
-	@ApiModelProperty(value = "卡片展示图片URL")
-	private String cardImg;
-	
-	@TableField("card_list_img")
-	@ApiModelProperty(value = "卡片列表展示图片URL")
-	private String cardListImg;
-
-	@TableField("month_fee")
-	@ApiModelProperty(value = "月费（美元），保留字段")
-	private Integer monthFee;
-
-	@TableField("recharge_fee")
-	@ApiModelProperty(value = "充值手续费率，例如 0.01 表示 1%")
-	private BigDecimal rechargeFee;
-
-	@TableField("refund_fee")
-	@ApiModelProperty(value = "退款手续费（必填）")
-	private BigDecimal refundFee;
-
-	@TableField("recommend")
-	@ApiModelProperty(value = "是否推荐")
-	private Boolean recommend;
-
-	@TableField("sort_param")
-	@ApiModelProperty(value = "排序参数")
-	private Integer sortParam;
-
-	@TableField("card_title")
-	@ApiModelProperty(value = "卡片名称")
-	private String cardTitle;
-
-	@TableField("active_min_limit")
-	@ApiModelProperty(value = "激活/首充最低金额（必填）")
-	private BigDecimal activeMinLimit;
-
-	@TableField("recharge_min_limit")
-	@ApiModelProperty(value = "每次非首充最低金额（必填）")
-	private BigDecimal rechargeMinLimit;
-
-	@TableField("recharge_max_limit")
-	@ApiModelProperty(value = "每次非首充最高金额（必填）")
-	private BigDecimal rechargeMaxLimit;
-
 	@TableField("card_bin")
-	@ApiModelProperty(value = "卡号段（必填）")
+	@ApiModelProperty(name = "cardBin",value = "关联BIN码",required = true,dataType = "String")
 	private String cardBin;
 	
-	@TableField("open_card_cost")
-	@ApiModelProperty(value = "开卡费用")
-	private BigDecimal openCardCost;
+	@TableField("card_title")
+	@ApiModelProperty(name = "cardTitle",value = "卡标题名称",required = true,dataType = "String")
+	private String cardTitle;
 	
-	@TableField("pre_save_cost")
-	@ApiModelProperty(value = "预存费用")
-	private BigDecimal preSaveCost;
+	@TableField("card_img")
+	@ApiModelProperty(name = "cardImg",value = "银行卡图片",required = true,dataType = "String")
+	private String cardImg;
+	
+	@TableField("bank_card_nature")
+	@ApiModelProperty(name = "bankCardNature",value = "卡类型：VIRTUAL、PHYSICAL",required = true,dataType = "String")
+	private String bankCardNature;
+	
+	@TableField("card_brand")
+	@ApiModelProperty(name = "bankCardNature",value = "卡品牌",required = true,dataType = "String")
+	private String cardBrand;
+	
+	@TableField("card_mode")
+	@ApiModelProperty(name = "cardMode",value = "卡模式 NORMAL 常规卡 ;SHARE 共享卡",required = true,dataType = "String")
+	private String cardMode;
+	
+	@TableField("ccy")
+	@ApiModelProperty(name = "ccy",value = "卡消费币种",required = true,dataType = "String")
+	private String ccy;
+	
+	@TableField("apply_fee")
+	@ApiModelProperty(name = "applyFee",value = "开卡费用，开卡一次收取",required = true,dataType = "String")
+	private BigDecimal applyFee;
+	
+	@TableField("recharge_fee")
+	@ApiModelProperty(name = "rechargeFee",value = "充值手续费比例，0-1之间",required = true,dataType = "String")
+	private BigDecimal rechargeFee;
+	
+	@TableField("bankcard_region")
+	@ApiModelProperty(name = "bankcardRegion",value = "卡片区域",required = true,dataType = "String")
+	private String bankcardRegion;
+	
+	@TableField("active_min_limit")
+	@ApiModelProperty(name = "activeMinLimit",value = "虚拟卡激活首次充值最小金额",required = true,dataType = "String")
+	private BigDecimal activeMinLimit;
+	
+	@TableField("recharge_min_limit")
+	@ApiModelProperty(name = "rechargeMinLimit",value = "单笔充值最小金额",required = true,dataType = "String")
+	private BigDecimal rechargeMinLimit;
 	
 	@TableField("card_state")
 	@ApiModelProperty(name = "cardState",value = "上下架状态1正常2下架",required = true,dataType = "Integer")
