@@ -33,6 +33,10 @@ public class ChannelInfoEntity extends PageQueryHelperEntity{
 	@TableField("channel_state")
 	@ApiModelProperty(name = "channelState",value = "渠道状态",required = true,dataType = "String")
     private Integer channelState;
+
+	@TableField("channel_type")
+	@ApiModelProperty(name = "channelType",value = "渠道类型 0:测试服，1：正式服",required = true,dataType = "String")
+	private Integer channelType;
 	
 	@TableField("api_url")
 	@ApiModelProperty(name = "apiUrl",value = "接口请求地址",required = true,dataType = "String")
