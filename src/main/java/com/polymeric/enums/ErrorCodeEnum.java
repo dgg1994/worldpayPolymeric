@@ -11,7 +11,11 @@ public enum ErrorCodeEnum {
     UID_ERROR(3001, "uid不正确"),
     UID_NULL(3002, "请添加uid请求头参数"),
     CHANNEL_NULL(4002, "渠道信息未配置！！！"),
-    CHANNEL_STATUS_ERROR(4003, "渠道状态异常！！！");
+    CHANNEL_STATUS_ERROR(4003, "渠道状态异常！！！"),
+    CARD_NULL(5001, "产品id不存在！！！"),
+    CARD_STATE_ERROR(5002, "产品状态不存在！！！"),
+    USER_BANK_CARD_ERROR(6001,"银行卡id不存在！！！"),
+    USER_BANK_CARD_TYPE_ERROR(6002,"银行卡类型不正确！！！");
 
     
     private final Integer code;

@@ -12,16 +12,19 @@ import com.polymeric.base.BaseApiService;
 import com.polymeric.base.ResponseBase;
 import com.polymeric.config.channel.UnifiedConfig;
 import com.polymeric.dao.channel.ChannelInfoDao;
+import com.polymeric.dao.merchants.MerchantsCardDao;
 import com.polymeric.dao.merchants.MerchantsInfoDao;
 import com.polymeric.dao.merchants.MerchantsIpDao;
 import com.polymeric.dao.merchants.MerchantsKeyDao;
 import com.polymeric.dao.merchants.MerchantsUserDao;
 import com.polymeric.entity.channel.ChannelInfoEntity;
+import com.polymeric.entity.merchants.MerchantsCardEntity;
 import com.polymeric.entity.merchants.MerchantsInfoEntity;
 import com.polymeric.entity.merchants.MerchantsIpEntity;
 import com.polymeric.entity.merchants.MerchantsKeyEntity;
 import com.polymeric.entity.merchants.MerchantsUserEntity;
 import com.polymeric.enums.ErrorCodeEnum;
+import com.polymeric.enums.PublicEnums;
 import com.polymeric.enums.SignHeardEnums;
 import com.polymeric.enums.UserStateEnums;
 import com.polymeric.utils.I18nUtil;
@@ -38,6 +41,7 @@ public class ApiCheck extends BaseApiService {
 	private static MerchantsKeyDao merchantsKeyDao;
 	private static MerchantsIpDao merchantsIpDao;
 	private static ChannelInfoDao channelInfoDao;
+	private static MerchantsCardDao merchantsCardDao;
 	private static IpUtil ipUtil;
 
 	@Autowired
@@ -63,6 +67,11 @@ public class ApiCheck extends BaseApiService {
 	@Autowired
 	public void setMerchantsUserDao(MerchantsUserDao merchantsUserDao) {
 		ApiCheck.merchantsUserDao = merchantsUserDao;
+	}
+	
+	@Autowired
+	public void setMerchantsUserDao(MerchantsCardDao merchantsCardDao) {
+		ApiCheck.merchantsCardDao = merchantsCardDao;
 	}
 
 	@Autowired
@@ -178,4 +187,26 @@ public class ApiCheck extends BaseApiService {
 		config.setRsaPrivateKey(privateKey);
 		return config;
 	}
+	
+	/**
+	 * @category 校验产品信息
+	 * @param queryProductId
+	 * @param infoEntity
+	 * @return
+	 */
+	public static ResponseBase checkCard(Integer queryProductId,MerchantsInfoEntity infoEntity) {
+		MerchantsCardEntity cardEntity = merchantsCardDao.selectById(queryProductId);
+		if (cardEntity == null) {
+			return setResultError(ErrorCodeEnum.CARD_NULL.getCode(), I18nUtil.getMessage("uid_null"));
+		}
+		if(!cardEntity.getMchAppid().equals(infoEntity.getAppId())) {
+			return setResultError(ErrorCodeEnum.CARD_NULL.getCode(), I18nUtil.getMessage("uid_null"));
+		}
+		if (!PublicEnums.ONE.getIndex().equals(cardEntity.getCardState())) {
+			return setResultError(ErrorCodeEnum.CARD_STATE_ERROR.getCode(),I18nUtil.getMessage("card_state_error"));
+		}
+		return setResultSuccess(cardEntity);
+	}
+	
+	
 }
