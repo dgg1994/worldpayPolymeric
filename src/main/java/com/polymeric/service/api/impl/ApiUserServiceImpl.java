@@ -3,6 +3,7 @@ package com.polymeric.service.api.impl;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -18,10 +19,14 @@ import com.polymeric.config.channel.PoloMethods;
 import com.polymeric.config.channel.UnifiedConfig;
 import com.polymeric.constants.Constants;
 import com.polymeric.dao.merchants.MerchantsUserDao;
+import com.polymeric.dao.merchants.MerchantsUserKycDao;
 import com.polymeric.entity.merchants.MerchantsInfoEntity;
 import com.polymeric.entity.merchants.MerchantsUserEntity;
+import com.polymeric.entity.merchants.MerchantsUserKycEntity;
 import com.polymeric.enums.ChannelCodeEnums;
 import com.polymeric.enums.ErrorCodeEnum;
+import com.polymeric.enums.KycStateEnums;
+import com.polymeric.pubapi.query.user.ApiKycApplyQuery;
 import com.polymeric.pubapi.query.user.ApiKycCountryQuery;
 import com.polymeric.pubapi.query.user.ApiRegisterQuery;
 import com.polymeric.response.polo.PoloRegisterRes;
@@ -37,6 +42,9 @@ public class ApiUserServiceImpl extends BaseApiService implements ApiUserService
 	
 	@Autowired
 	private MerchantsUserDao merchantsUserDao;
+	
+	@Autowired
+	private MerchantsUserKycDao merchantsUserKycDao;
 
 	@Override
 	public ResponseBase register(HttpServletRequest request,@Valid @RequestBody ApiRegisterQuery registerQuery) {
@@ -88,6 +96,7 @@ public class ApiUserServiceImpl extends BaseApiService implements ApiUserService
 			entity.setMchId(infoEntity.getId());
 			entity.setUserEmail(registerQuery.getEmail());
 			entity.setUserTel(registerQuery.getTel());
+			entity.setKycState(KycStateEnums.WAIT_APPROVE.getIndex());
 			GenericityUtil.setDate(entity);
 			merchantsUserDao.insert(entity);
 			return base;
@@ -170,6 +179,70 @@ public class ApiUserServiceImpl extends BaseApiService implements ApiUserService
 		// 调用三方接口
 		ResponseBase base = ApiPoloUtil.postData(infoEntity.getMerchantsUserData().getApiUid(), null, null, config);
 		return base;
+	}
+
+	@Override
+	public ResponseBase kycApply(HttpServletRequest request,@Valid @RequestBody ApiKycApplyQuery apiKycApplyQuery) {
+		try {
+			ResponseBase base = ApiCheck.checkHeader(request, apiKycApplyQuery);
+			if(!Constants.HTTP_RES_CODE_200.equals(base.getCode())) {
+				return base;
+			}
+			MerchantsInfoEntity infoEntity = JSONObject.parseObject(JSON.toJSONString(base.getData()), MerchantsInfoEntity.class);
+			if(ChannelCodeEnums.POLO.getCode().equals(infoEntity.getChannelCode())) {
+				return this.poloKycApply(infoEntity,apiKycApplyQuery);
+			}else {
+				return setResultError(ErrorCodeEnum.CHANNEL_NULL.getCode(), I18nUtil.getMessage("channel_null"));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
+	}
+	
+	/**
+	 * @category polo kyc信息提交
+	 * @param infoEntity
+	 * @param apiKycApplyQuery
+	 * @return
+	 */
+	public ResponseBase poloKycApply(MerchantsInfoEntity infoEntity, @Valid ApiKycApplyQuery apiKycApplyQuery) {
+		try {
+			// 获取上游配置
+			UnifiedConfig config = ApiCheck.getConfig(
+					infoEntity.getChannelData(), 
+					PoloConfig.API_URL, 
+					PoloConfig.APP_ID,
+					PoloConfig.RSA_PRIVATE_KEY,
+					PoloConfig.AES_KEY, 
+					PoloMethods.KYC_APPLY);
+			if (infoEntity.getMerchantsUserData() == null) {
+				return setResultError(ErrorCodeEnum.UID_NULL.getCode(), I18nUtil.getMessage("uid_null"));
+			}
+			// 调用三方接口
+			ResponseBase base = ApiPoloUtil.postData(infoEntity.getMerchantsUserData().getApiUid(), null, apiKycApplyQuery, config);
+			if(Constants.HTTP_RES_CODE_200.equals(base.getCode())) {//提交成功
+				MerchantsUserEntity userEntity = infoEntity.getMerchantsUserData();
+				MerchantsUserKycEntity entity = new MerchantsUserKycEntity();
+				BeanUtils.copyProperties(apiKycApplyQuery, entity);
+				entity.setId(null);
+				entity.setMchId(infoEntity.getId());
+				entity.setMchAppid(infoEntity.getAppId());
+				entity.setUserEmail(apiKycApplyQuery.getEmail());
+				entity.setUserBirthday(apiKycApplyQuery.getBirthday());
+				entity.setUserPhone(apiKycApplyQuery.getPhone());
+				entity.setUserId(userEntity.getId());
+				entity.setUserUid(userEntity.getApiUid());
+				GenericityUtil.setDate(entity);
+				merchantsUserKycDao.insert(entity);
+				userEntity.setKycState(KycStateEnums.PROCESS_APPROVE.getIndex());
+				merchantsUserDao.updateById(userEntity);
+			}
+			return base;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
 	}
 
 }

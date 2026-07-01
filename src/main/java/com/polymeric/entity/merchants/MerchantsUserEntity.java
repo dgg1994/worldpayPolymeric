@@ -49,6 +49,10 @@ public class MerchantsUserEntity extends PageQueryHelperEntity{
 	@ApiModelProperty(name = "userTel",value = "用户手机号",required = true,dataType = "String")
     private String userTel;
 	
+	@TableField("kyc_state")
+	@ApiModelProperty(name = "kycState",value = "kyc认证状态",required = true,dataType = "String")
+    private Integer kycState;
+	
 	@TableField("setTime")
 	@ApiModelProperty(name = "setTime",value = "注册时间",required = false,dataType = "Date")
     private Date setTime;

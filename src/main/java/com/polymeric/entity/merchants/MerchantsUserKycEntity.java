@@ -1,16 +1,10 @@
 package com.polymeric.entity.merchants;
-
-import java.math.BigDecimal;
 import java.util.Date;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.polymeric.entity.channel.ChannelCardEntity;
 import com.polymeric.query.pub.PageQueryHelperEntity;
 
 import io.swagger.annotations.ApiModel;
@@ -27,6 +21,14 @@ public class MerchantsUserKycEntity extends PageQueryHelperEntity {
 	@TableId(type = IdType.AUTO)
 	@ApiModelProperty(name = "id", value = "主键", required = true, dataType = "Integer")
 	private Integer id;
+	
+	@TableField("user_id")
+	@ApiModelProperty(name = "userId", value = "用户id", required = true, dataType = "String")
+	private Integer userId;
+	
+	@TableField("user_uid")
+	@ApiModelProperty(name = "userUid", value = "用户uid", required = true, dataType = "String")
+	private String userUid;
 
 	@TableField("mch_id")
 	@ApiModelProperty(name = "mchId", value = "商户id", required = true, dataType = "String")
@@ -49,7 +51,7 @@ public class MerchantsUserKycEntity extends PageQueryHelperEntity {
 	private String idNo;
 
 	@TableField("user_email")
-	@ApiModelProperty(name = "email", value = "电子邮件", required = true, dataType = "String")
+	@ApiModelProperty(name = "userEmail", value = "电子邮件", required = true, dataType = "String")
 	private String userEmail;
 
 	@TableField("nation_code")
@@ -69,7 +71,7 @@ public class MerchantsUserKycEntity extends PageQueryHelperEntity {
 	private String idBackUrl;
 
 	@TableField("user_birthday")
-	@ApiModelProperty(name = "birthday", value = "生日", required = true, dataType = "String", example = "1990-01-01")
+	@ApiModelProperty(name = "userBirthday", value = "生日", required = true, dataType = "String", example = "1990-01-01")
 	private String userBirthday;
 
 	@TableField("country_code")
@@ -81,7 +83,7 @@ public class MerchantsUserKycEntity extends PageQueryHelperEntity {
 	private String areaCode;
 
 	@TableField("user_phone")
-	@ApiModelProperty(name = "phone", value = "手机号", required = true, dataType = "String")
+	@ApiModelProperty(name = "userPhone", value = "手机号", required = true, dataType = "String")
 	private String userPhone;
 
 	@TableField("file_type")

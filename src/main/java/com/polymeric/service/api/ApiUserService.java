@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.polymeric.base.ResponseBase;
+import com.polymeric.pubapi.query.user.ApiKycApplyQuery;
 import com.polymeric.pubapi.query.user.ApiKycCountryQuery;
 import com.polymeric.pubapi.query.user.ApiRegisterQuery;
 
@@ -28,5 +29,9 @@ public interface ApiUserService {
 	@GetMapping("/kyc/status")
 	@ApiOperation(value = "查询KYC状态", notes = "查询KYC状态", response = ResponseBase.class)
 	ResponseBase kycStatus(HttpServletRequest request);
+	
+	@PostMapping("/kyc/apply")
+	@ApiOperation(value = "提交KYC信息", notes = "提交KYC信息", response = ResponseBase.class)
+	ResponseBase kycApply(HttpServletRequest request,ApiKycApplyQuery apiKycApplyQuery);
 
 }

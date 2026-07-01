@@ -183,7 +183,14 @@ public class ApiPoloUtil extends BaseApiService {
         return result;
     }
 
-    
+    /**
+     * @category 调用polo三方接口
+     * @param uId 用户uid
+     * @param requestOrderId 订单号
+     * @param object body参数
+     * @param config 配置信息
+     * @return
+     */
     public static ResponseBase postData(String uId, String requestOrderId, Object object,UnifiedConfig config) {
         try {
         	

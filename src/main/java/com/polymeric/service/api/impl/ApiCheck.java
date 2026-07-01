@@ -113,12 +113,12 @@ public class ApiCheck extends BaseApiService {
 				|| keyEntity.getPublicKey().isEmpty()) {
 			return setResultError(I18nUtil.getMessage("secretKey_error"));
 		}
-		// IP白名单控制
-		String ipAddress = ipUtil.getClientIp(request);
-		MerchantsIpEntity ipEntity = merchantsIpDao.findAppIdIp(appid, ipAddress);
-		if (ipEntity == null) {
-			return setResultError(ErrorCodeEnum.IP_ERROR.getCode(), I18nUtil.getMessage("ip_error"));
-		}
+//		// IP白名单控制
+//		String ipAddress = ipUtil.getClientIp(request);
+//		MerchantsIpEntity ipEntity = merchantsIpDao.findAppIdIp(appid, ipAddress);
+//		if (ipEntity == null) {
+//			return setResultError(ErrorCodeEnum.IP_ERROR.getCode(), I18nUtil.getMessage("ip_error"));
+//		}
 //		// 获取请求头时间戳
 //		String timestamp = request.getHeader(SignHeardEnums.TIMESTAMP.getName());
 //		// 校验到期时间

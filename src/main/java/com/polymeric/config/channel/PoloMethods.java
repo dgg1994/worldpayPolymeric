@@ -11,7 +11,10 @@ public interface PoloMethods {
     //查询KYC状态
     public static String KYC_STATUS= "/user/kyc/status";
     
-    //查询KYC状态
+    //单个文件上传
     public static String UPLOAD_FILE= "/upload/file";
+    
+    //提交KYC信息
+    public static String KYC_APPLY= "/user/kyc/apply";
 
 }
