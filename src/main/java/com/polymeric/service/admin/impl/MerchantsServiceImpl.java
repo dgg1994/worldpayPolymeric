@@ -1,11 +1,15 @@
 package com.polymeric.service.admin.impl;
 
 import java.util.List;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -136,23 +140,29 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
 	@Override
 	public ResponseBase findList(@RequestBody MerchantsInfoEntity entity) {
 		try {
-			PageHelper.startPage(entity.getPageNumber(), entity.getPageSize());
-			List<MerchantsInfoEntity> list = merchantsInfoDao.findList(entity);
-			if(list != null && list.size() > 0) {
-				for (int i = 0; i < list.size(); i++) {
-					List<MerchantsIpEntity> ipEntities = merchantsIpDao.findByMerchantsId(list.get(i).getId());
-					list.get(i).setIpList(ipEntities);
-					MerchantsKeyEntity keyEntity = merchantsKeyDao.findAppId(list.get(i).getAppId());
-					list.get(i).setMerchantsKey(keyEntity);
-					
+			String merchantsAccount = entity.getMerchantsAccount();
+			QueryWrapper<MerchantsInfoEntity> wrapper = new QueryWrapper<>();
+			if (StringUtils.isNotBlank(merchantsAccount)){
+				wrapper.eq("merchants_account",merchantsAccount);
+			}
+			Integer merchantsStatus = entity.getMerchantsStatus();
+			if (merchantsStatus != null){
+				wrapper.eq("merchants_status",merchantsStatus);
+			}
+			wrapper.orderByDesc("setTime");
+			List<MerchantsInfoEntity> list = merchantsInfoDao.selectList(wrapper);
+			if(list != null && !list.isEmpty()) {
+				for (MerchantsInfoEntity merchantsInfoEntity : list) {
+					List<MerchantsIpEntity> ipEntities = merchantsIpDao.findByMerchantsId(merchantsInfoEntity.getId());
+					merchantsInfoEntity.setIpList(ipEntities);
+					MerchantsKeyEntity keyEntity = merchantsKeyDao.findAppId(merchantsInfoEntity.getAppId());
+					merchantsInfoEntity.setMerchantsKey(keyEntity);
 				}
 			}
-			PageInfo<MerchantsInfoEntity> info = new PageInfo<>(list);
-			MerchantsInfoEntity sum = merchantsInfoDao.findSum(entity);
-			PublicRes<MerchantsInfoEntity> res = new PublicRes<>();
-			res.setData(sum);
-			res.setInfo(info);
-			return setResultSuccess(res, Constants.SUCCESS);
+			List<MerchantsInfoEntity> pageList = GenericityUtil.Page(list, entity.getPageNumber(), entity.getPageSize());
+			PageInfo<MerchantsInfoEntity> info = new PageInfo<>(pageList);
+			info.setTotal(list.size());
+			return setResultSuccess(info, Constants.SUCCESS);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException();

@@ -2,10 +2,15 @@ package com.polymeric.service.admin.impl;
 
 import java.util.List;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSON;
@@ -78,6 +83,56 @@ public class ChannelCardServiceImpl extends BaseApiService implements ChannelCar
 			e.printStackTrace();
 			throw new RuntimeException();
 		}
+	}
+
+	@Override
+	public ResponseBase findList(@RequestBody ChannelCardEntity entity) {
+		PageHelper.startPage(entity.getPageNumber(), entity.getPageSize());
+		QueryWrapper<ChannelCardEntity> wrapper = new QueryWrapper<>();
+		Integer channelId = entity.getChannelId();
+		if (channelId != null) {
+			wrapper.eq("channel_id", channelId);
+		}
+		String cardTitle = entity.getCardTitle();
+		if (StringUtils.isNoneBlank(cardTitle)) {
+			wrapper.eq("card_title", cardTitle);
+		}
+		String bankCardNature = entity.getBankCardNature();
+		if (StringUtils.isNoneBlank(bankCardNature)) {
+			wrapper.eq("bank_card_nature", bankCardNature);
+		}
+		Integer cardState = entity.getCardState();
+		if (cardState != null){
+			wrapper.eq("card_state",cardState);
+		}
+		List<ChannelCardEntity> list = channelCardDao.selectList(wrapper);
+		PageInfo<ChannelCardEntity> info = new PageInfo<>(list);
+		return setResultSuccess(info, Constants.SUCCESS);
+	}
+
+	@Override
+	public ResponseBase update(@RequestBody ChannelCardEntity entity) {
+		Integer id = entity.getId();
+		if (id == null){
+			return setResultError("未传入产品id");
+		}
+		ChannelCardEntity channelCardEntity = channelCardDao.selectById(id);
+		if (channelCardEntity == null){
+			return setResultError("产品信息错误");
+		}
+		channelCardDao.updateById(entity);
+		return setResultSuccess();
+	}
+
+	@Override
+	public ResponseBase updateState(Integer id, Integer cardStatus) {
+		ChannelCardEntity channelCardEntity = channelCardDao.selectById(id);
+		if (channelCardEntity == null){
+			return setResultError("产品信息错误");
+		}
+		channelCardEntity.setCardState(cardStatus);
+		channelCardDao.updateById(channelCardEntity);
+		return setResultSuccess();
 	}
 
 }
