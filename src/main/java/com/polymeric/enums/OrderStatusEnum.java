@@ -13,19 +13,11 @@ import com.polymeric.entity.system.DicEntity;
  */
 public enum OrderStatusEnum {
 
-    WAIT_PAY(0, "待支付"),
+    WAIT_PAY(0, "处理中"),
     
-    SUCCESS(1, "支付成功"),
+    SUCCESS(1, "成功"),
     
-    FAIL(2, "支付失败"),
-    
-    REFUND(3, "已退款"),
-    
-    CLOSED(4, "已关闭"),
-    
-    NOT_OUT_CODE(5, "未出码"),
-    
-    EXCEPTION(6, "异常");
+    FAIL(2, "失败");
 
     private final Integer code;
     

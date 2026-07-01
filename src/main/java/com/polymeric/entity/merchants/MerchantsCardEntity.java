@@ -47,6 +47,10 @@ public class MerchantsCardEntity extends PageQueryHelperEntity{
 	@ApiModelProperty(name = "channelCode",value = "渠道编号",required = true,dataType = "String")
     private String channelCode;
 	
+	@TableField("channel_card_id")
+	@ApiModelProperty(name = "channelCardId",value = "渠道卡id",required = true,dataType = "String")
+    private Integer channelCardId;
+	
 	@TableField("card_id")
 	@ApiModelProperty(name = "cardId",value = "三方卡片id",required = true,dataType = "String")
 	private Integer cardId;

@@ -63,6 +63,10 @@ public class MerchantsInfoEntity extends PageQueryHelperEntity{
 	@ApiModelProperty(name = "availableAmount",value = "可用余额",required = true,dataType = "String")
     private BigDecimal availableAmount;
 	
+	@TableField("freeze_amount")
+	@ApiModelProperty(name = "freezeAmount",value = "冻结金额",required = true,dataType = "String")
+    private BigDecimal freezeAmount;
+	
 	@TableField("merchants_status")
 	@ApiModelProperty(name = "merchantsStatus",value = "商户状态",required = true,dataType = "Integer")
     private Integer merchantsStatus;

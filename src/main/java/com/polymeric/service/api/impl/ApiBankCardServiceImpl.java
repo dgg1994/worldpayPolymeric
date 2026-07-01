@@ -20,15 +20,21 @@ import com.polymeric.config.channel.PoloConfig;
 import com.polymeric.config.channel.PoloMethods;
 import com.polymeric.config.channel.UnifiedConfig;
 import com.polymeric.constants.Constants;
+import com.polymeric.dao.channel.ChannelCardDao;
 import com.polymeric.dao.merchants.MerchantsCardDao;
+import com.polymeric.dao.merchants.MerchantsInfoDao;
 import com.polymeric.dao.merchants.MerchantsUserCardDao;
+import com.polymeric.dao.order.OpenCardOrderDao;
+import com.polymeric.entity.channel.ChannelCardEntity;
 import com.polymeric.entity.merchants.MerchantsCardEntity;
 import com.polymeric.entity.merchants.MerchantsInfoEntity;
 import com.polymeric.entity.merchants.MerchantsUserCardEntity;
+import com.polymeric.entity.order.OpenCardOrderEntity;
 import com.polymeric.enums.CardStateEnums;
 import com.polymeric.enums.CardTypeEnums;
 import com.polymeric.enums.ChannelCodeEnums;
 import com.polymeric.enums.ErrorCodeEnum;
+import com.polymeric.enums.OrderStatusEnum;
 import com.polymeric.enums.PublicEnums;
 import com.polymeric.query.api.ApiActiveQuery;
 import com.polymeric.query.api.ApiCardApplyQuery;
@@ -38,8 +44,10 @@ import com.polymeric.response.api.PoloMerchantBankcardRes;
 import com.polymeric.response.polo.PoloApplyCardRes;
 import com.polymeric.service.api.ApiBankCardService;
 import com.polymeric.utils.AesUtils;
+import com.polymeric.utils.BigDecimalUtils;
 import com.polymeric.utils.GenericityUtil;
 import com.polymeric.utils.I18nUtil;
+import com.polymeric.utils.OrderCodeFactory;
 import com.polymeric.utils.sign.ApiPoloUtil;
 
 @RestController
@@ -52,6 +60,15 @@ public class ApiBankCardServiceImpl extends BaseApiService implements ApiBankCar
 	
 	@Autowired
 	private MerchantsUserCardDao merchantsUserCardDao;
+	
+	@Autowired
+	private ChannelCardDao channelCardDao;
+	
+	@Autowired
+	private OpenCardOrderDao openCardOrderDao;
+	
+	@Autowired
+	private MerchantsInfoDao merchantsInfoDao;
 
 	@Override
 	public ResponseBase merchantBankCardList(HttpServletRequest request) {
@@ -166,8 +183,12 @@ public class ApiBankCardServiceImpl extends BaseApiService implements ApiBankCar
 			if(!Constants.HTTP_RES_CODE_200.equals(cardBase.getCode())) {
 				return cardBase;
 			}
-			//产品信息
+			//商户产品信息
 			MerchantsCardEntity cardEntity = JSONObject.parseObject(JSON.toJSONString(cardBase.getData()), MerchantsCardEntity.class);
+			//判断商户余额是否充足
+			if (BigDecimalUtils.isLessThan(infoEntity.getAvailableAmount(), cardEntity.getApplyFee())) {
+				return setResultError(ErrorCodeEnum.AMOUNT_SCARCITY.getCode(), I18nUtil.getMessage("amount_scarcity"));
+			}
 			// 调用三方接口
 			cardApplyQuery.setProductId(cardEntity.getCardId());
 			ResponseBase base = ApiPoloUtil.postData(infoEntity.getMerchantsUserData().getApiUid(), null, cardApplyQuery, config);
@@ -176,21 +197,9 @@ public class ApiBankCardServiceImpl extends BaseApiService implements ApiBankCar
 			}
 			//新增商户用户银行卡
 			PoloApplyCardRes applyCardRes = JSONObject.parseObject(JSON.toJSONString(base.getData()), PoloApplyCardRes.class);
-			MerchantsUserCardEntity userCardEntity = new MerchantsUserCardEntity();
-			userCardEntity.setUserId(infoEntity.getMerchantsUserData().getId());
-			userCardEntity.setUserUid(infoEntity.getMerchantsUserData().getApiUid());
-			userCardEntity.setMchId(infoEntity.getId());
-			userCardEntity.setMchAppid(infoEntity.getAppId());
-			userCardEntity.setCardId(cardEntity.getId());
-			userCardEntity.setCardApiId(cardEntity.getCardId());
-			userCardEntity.setUserBankcardId(applyCardRes.getUserBankcardId());
-			userCardEntity.setCardType(cardEntity.getBankCardNature());
-			userCardEntity.setCardNum(applyCardRes.getCardNo());
-			userCardEntity.setCardBalance(BigDecimal.ZERO);
-			userCardEntity.setCardState(CardStateEnums.WAITING_ACTIVATE.getIndex());
-			userCardEntity.setOrderNum(applyCardRes.getOrderNo());
-			GenericityUtil.setDate(userCardEntity);
-			merchantsUserCardDao.insert(userCardEntity);
+			this.addMchUserCard(infoEntity, cardEntity, applyCardRes);
+			//开卡费用处理
+			this.openCardAmount(infoEntity, cardEntity, applyCardRes,OrderStatusEnum.SUCCESS.getCode());
 			return base;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -284,6 +293,10 @@ public class ApiBankCardServiceImpl extends BaseApiService implements ApiBankCar
 			}
 			//产品信息
 			MerchantsCardEntity cardEntity = JSONObject.parseObject(JSON.toJSONString(cardBase.getData()), MerchantsCardEntity.class);
+			//判断商户余额是否充足
+			if (BigDecimalUtils.isLessThan(infoEntity.getAvailableAmount(), cardEntity.getApplyFee())) {
+				return setResultError(ErrorCodeEnum.AMOUNT_SCARCITY.getCode(), I18nUtil.getMessage("amount_scarcity"));
+			}
 			// 调用三方接口
 			activeQuery.setProductId(cardEntity.getCardId());
 			ResponseBase base = ApiPoloUtil.postData(infoEntity.getMerchantsUserData().getApiUid(), null,activeQuery, config);
@@ -292,27 +305,18 @@ public class ApiBankCardServiceImpl extends BaseApiService implements ApiBankCar
 			}
 			//新增商户用户银行卡
 			PoloApplyCardRes applyCardRes = JSONObject.parseObject(JSON.toJSONString(base.getData()), PoloApplyCardRes.class);
-			MerchantsUserCardEntity userCardEntity = new MerchantsUserCardEntity();
-			userCardEntity.setUserId(infoEntity.getMerchantsUserData().getId());
-			userCardEntity.setUserUid(infoEntity.getMerchantsUserData().getApiUid());
-			userCardEntity.setMchId(infoEntity.getId());
-			userCardEntity.setMchAppid(infoEntity.getAppId());
-			userCardEntity.setCardId(cardEntity.getId());
-			userCardEntity.setCardApiId(cardEntity.getCardId());
-			userCardEntity.setUserBankcardId(applyCardRes.getUserBankcardId());
-			userCardEntity.setCardType(cardEntity.getBankCardNature());
-			userCardEntity.setCardNum(applyCardRes.getCardNo());
-			userCardEntity.setCardBalance(BigDecimal.ZERO);
-			userCardEntity.setCardState(CardStateEnums.WAITING_ACTIVATE.getIndex());
-			userCardEntity.setOrderNum(applyCardRes.getOrderNo());
-			GenericityUtil.setDate(userCardEntity);
-			merchantsUserCardDao.insert(userCardEntity);
+			this.addMchUserCard(infoEntity, cardEntity, applyCardRes);
+			//开卡费用处理
+			this.openCardAmount(infoEntity, cardEntity, applyCardRes,OrderStatusEnum.SUCCESS.getCode());
 			return base;
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException();
 		}
 	}
+	
+	
+	
 
 	@Override
 	public ResponseBase setPin(HttpServletRequest request, @Valid @RequestBody ApiSetPinQuery setPinQuery) {
@@ -368,6 +372,81 @@ public class ApiBankCardServiceImpl extends BaseApiService implements ApiBankCar
 			userCardEntity.setPinNum(aesPin);
 			merchantsUserCardDao.updateById(userCardEntity);
 			return base;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
+	}
+	
+	/****************************************************************以下是公共方法******************************************************************************/
+	/**
+	 * @category polo 新增商户用户银行卡
+	 * @param infoEntity
+	 * @param cardEntity
+	 * @param applyCardRes
+	 */
+	public MerchantsUserCardEntity addMchUserCard(MerchantsInfoEntity infoEntity,MerchantsCardEntity cardEntity,PoloApplyCardRes applyCardRes) {
+		try {
+			MerchantsUserCardEntity userCardEntity = new MerchantsUserCardEntity();
+			userCardEntity.setUserId(infoEntity.getMerchantsUserData().getId());
+			userCardEntity.setUserUid(infoEntity.getMerchantsUserData().getApiUid());
+			userCardEntity.setMchId(infoEntity.getId());
+			userCardEntity.setMchAppid(infoEntity.getAppId());
+			userCardEntity.setCardId(cardEntity.getId());
+			userCardEntity.setCardApiId(cardEntity.getCardId());
+			userCardEntity.setUserBankcardId(applyCardRes.getUserBankcardId());
+			userCardEntity.setCardType(cardEntity.getBankCardNature());
+			userCardEntity.setCardNum(applyCardRes.getCardNo());
+			userCardEntity.setCardBalance(BigDecimal.ZERO);
+			userCardEntity.setCardState(CardStateEnums.WAITING_ACTIVATE.getIndex());
+			userCardEntity.setOrderNum(applyCardRes.getOrderNo());
+			GenericityUtil.setDate(userCardEntity);
+			merchantsUserCardDao.insert(userCardEntity);
+			return userCardEntity;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
+	}
+	
+	/**
+	 * @category polo 开卡交易记录商户余额处理
+	 * @param infoEntity
+	 * @param cardEntity
+	 * @param applyCardRes
+	 */
+	public void openCardAmount(MerchantsInfoEntity infoEntity,MerchantsCardEntity cardEntity,PoloApplyCardRes applyCardRes,Integer orderState) {
+		try {
+			OpenCardOrderEntity cardOrderEntity = new OpenCardOrderEntity();
+			cardOrderEntity.setOrderNum(OrderCodeFactory.getOrderCode(Long.parseLong(infoEntity.getMerchantsUserData().getApiUid())));
+			cardOrderEntity.setChannelId(infoEntity.getChannelId());
+			cardOrderEntity.setChannelCode(infoEntity.getChannelCode());
+			cardOrderEntity.setMchId(infoEntity.getId());
+			cardOrderEntity.setMchAppid(infoEntity.getAppId());
+			cardOrderEntity.setUserId(infoEntity.getMerchantsUserData().getId());
+			cardOrderEntity.setUserUid(infoEntity.getMerchantsUserData().getApiUid());
+			cardOrderEntity.setCardId(cardEntity.getId());
+			cardOrderEntity.setCardApiId(cardEntity.getCardId());
+			cardOrderEntity.setUserBankcardId(applyCardRes.getUserBankcardId());
+			cardOrderEntity.setCardType(cardEntity.getBankCardNature());
+			ChannelCardEntity channelCardEntity = channelCardDao.selectById(cardEntity.getChannelCardId());
+			if(channelCardEntity != null) {
+				cardOrderEntity.setChannelOpenAmount(channelCardEntity.getApplyFee());				
+			}
+			cardOrderEntity.setMchOpenAmount(cardEntity.getApplyFee());
+			cardOrderEntity.setProfitAmount(BigDecimalUtils.subtract(cardOrderEntity.getMchOpenAmount(), cardOrderEntity.getChannelOpenAmount()));
+			cardOrderEntity.setOrderState(orderState);
+			GenericityUtil.setDate(cardOrderEntity);
+			openCardOrderDao.insert(cardOrderEntity);
+			if(OrderStatusEnum.WAIT_PAY.getCode().equals(orderState)) {//处理中
+				//商户余额处理
+				infoEntity.setAvailableAmount(BigDecimalUtils.subtract(infoEntity.getAvailableAmount(), cardOrderEntity.getMchOpenAmount()));
+				infoEntity.setFreezeAmount(BigDecimalUtils.subtract(infoEntity.getFreezeAmount(), cardOrderEntity.getMchOpenAmount()));
+				merchantsInfoDao.updateById(infoEntity);
+			}else if(OrderStatusEnum.SUCCESS.getCode().equals(orderState)) {
+				infoEntity.setAvailableAmount(BigDecimalUtils.subtract(infoEntity.getAvailableAmount(), cardOrderEntity.getMchOpenAmount()));
+				merchantsInfoDao.updateById(infoEntity);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException();

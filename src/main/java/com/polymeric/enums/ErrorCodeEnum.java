@@ -14,8 +14,9 @@ public enum ErrorCodeEnum {
     CHANNEL_STATUS_ERROR(4003, "渠道状态异常！！！"),
     CARD_NULL(5001, "产品id不存在！！！"),
     CARD_STATE_ERROR(5002, "产品状态不存在！！！"),
-    USER_BANK_CARD_ERROR(6001,"银行卡id不存在！！！"),
-    USER_BANK_CARD_TYPE_ERROR(6002,"银行卡类型不正确！！！");
+    USER_BANK_CARD_ERROR(5101,"银行卡id不存在！！！"),
+    USER_BANK_CARD_TYPE_ERROR(5102,"银行卡类型不正确！！！"),
+    AMOUNT_SCARCITY(5201,"商户余额不足！！！");
 
     
     private final Integer code;
