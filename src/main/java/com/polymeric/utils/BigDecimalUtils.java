@@ -39,4 +39,27 @@ public class BigDecimalUtils {
         BigDecimal safeTarget = target != null ? target : BigDecimal.ZERO;
         return safeSource.compareTo(safeTarget) >= 0;
     }
+    
+    
+    /**
+     * 计算含费率的总金额：总金额 = 原金额 * (1 + 费率)
+     * @param amount 原金额
+     * @param rate 费率
+     * @return 含费率的总金额
+     */
+    public static BigDecimal calculateWithRate(BigDecimal amount, BigDecimal rate) {
+        BigDecimal safeAmount = amount != null ? amount : BigDecimal.ZERO;
+        BigDecimal safeRate = rate != null ? rate : BigDecimal.ZERO;
+        return safeAmount.multiply(BigDecimal.ONE.add(safeRate));
+    }
+    
+    /**
+     * 计算费用：费用 = 原金额 * 费率
+     */
+    public static BigDecimal calculateFee(BigDecimal amount, BigDecimal rate) {
+        BigDecimal safeAmount = amount != null ? amount : BigDecimal.ZERO;
+        BigDecimal safeRate = rate != null ? rate : BigDecimal.ZERO;
+        return safeAmount.multiply(safeRate);
+    }
+    
 }

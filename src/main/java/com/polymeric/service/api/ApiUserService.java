@@ -15,7 +15,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @RequestMapping("/api/user")
-@Api(value = "用户管理",tags = "用户管理")
+@Api(value = "用户",tags = "用户")
 public interface ApiUserService {
 	
 	@PostMapping("/register")

@@ -31,5 +31,29 @@ public interface PoloMethods {
     
     //银行卡激活
     public static String BANKCARD_ACTIVE= "/bankcard/active";
+    
+    //查询银行卡余额
+    public static String BANKCARD_BALANCE= "/bankcard/balance";
+    
+    //银行卡充值
+    public static String BANKCARD_RECHARGE= "/bankcard/recharge";
+    
+    //更新银行卡状态
+    public static String BANKCARD_UPDATE_STATUS= "/bankcard/update/status";
+    
+    //注销银行卡
+    public static String BANKCARD_CLOSE= "/bankcard/close";
+    
+    //查询银行卡信息
+    public static String BANKCARD_INFO= "/bankcard/info";
+    
+    //更新银行卡邮箱
+    public static String BANKCARD_UPDATE_EMAIL= "/bankcard/update/email";
+    
+    //查询pin
+    public static String BANKCARD_QUERYPIN= "/bankcard/queryPin";
+    
+    //查询银行卡交易记录
+    public static String BANKCARD_TRADE_DETAILS= "/bankcard/trade/details";
 
 }
