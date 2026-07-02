@@ -27,6 +27,8 @@ public interface Constants {
 	String  API_RES_E="ERROR";
 	
 	String ADMIN_STR = "admin";
+	
+	String USD = "USD";
 			
 	int PAGENUMBER = 1;
 	

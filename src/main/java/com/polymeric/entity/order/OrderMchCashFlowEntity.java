@@ -18,7 +18,7 @@ import lombok.EqualsAndHashCode;
 @TableName("order_mch_cash_flow")
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(value = "商户资金流水",description = "商户资金流水")
-public class MerchantsOrderEntity extends PageQueryHelperEntity{
+public class OrderMchCashFlowEntity extends PageQueryHelperEntity{
 	
 	@TableId(type = IdType.AUTO)
 	@ApiModelProperty(name = "id",value = "主键",required = true,dataType = "Integer")
