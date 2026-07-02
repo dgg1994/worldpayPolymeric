@@ -464,7 +464,12 @@ public class ApiBankCardServiceImpl extends BaseApiService implements ApiBankCar
 			}
 			//新增商户资金明细记录
 			MerchantsOrderEntity merchantsOrderEntity = new MerchantsOrderEntity();
-			merchantsOrderEntity.setOrderNum(OrderCodeFactory.getOrderCode(null));
+			String orderNum = "WP"+OrderCodeFactory.getOrderCode(null);
+			merchantsOrderEntity.setOrderNum(orderNum);
+			merchantsOrderEntity.setMchOrderNum(orderNum);
+			merchantsOrderEntity.setUserId(infoEntity.getMerchantsUserData().getId());
+			merchantsOrderEntity.setUserUid(infoEntity.getMerchantsUserData().getApiUid());
+			merchantsOrderEntity.setUserBankcardId(applyCardRes.getUserBankcardId());
 			merchantsOrderEntity.setMchId(infoEntity.getId());
 			merchantsOrderEntity.setMchAppid(infoEntity.getAppId());
 			merchantsOrderEntity.setTradeType(OrderTypeEnum.OPEN_CARD.getLable());

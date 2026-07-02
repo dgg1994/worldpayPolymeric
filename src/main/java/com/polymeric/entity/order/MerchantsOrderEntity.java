@@ -28,6 +28,10 @@ public class MerchantsOrderEntity extends PageQueryHelperEntity{
 	@ApiModelProperty(name = "orderNum", value = "订单号", required = true, dataType = "String")
 	private String orderNum;
 	
+	@TableField("mch_order_num")
+	@ApiModelProperty(name = "mchOrderNum", value = "下游商户订单号", required = true, dataType = "String")
+	private String mchOrderNum;
+	
 	@TableField("mch_id")
 	@ApiModelProperty(name = "mchId",value = "商户id",required = true,dataType = "String")
     private Integer mchId;
@@ -35,6 +39,18 @@ public class MerchantsOrderEntity extends PageQueryHelperEntity{
 	@TableField("mch_appid")
 	@ApiModelProperty(name = "mchAppid",value = "商户编号",required = true,dataType = "String")
     private String mchAppid;
+	
+	@TableField("user_id")
+	@ApiModelProperty(name = "userId",value = "商户用户id",required = true,dataType = "String")
+    private Integer userId;
+	
+	@TableField("user_uid")
+	@ApiModelProperty(name = "userUid",value = "商户用户uid",required = true,dataType = "String")
+    private String userUid;
+	
+	@TableField("user_bankcard_id")
+	@ApiModelProperty(name = "userBankcardId", value = "用户银行卡唯一id", required = true, dataType = "Integer")
+	private Integer userBankcardId;
 	
 	@TableField("trade_type")
 	@ApiModelProperty(name = "tradeType",value = "交易类型（1入账；2出账）",required = true,dataType = "String")
