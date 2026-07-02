@@ -47,6 +47,10 @@ public class MerchantsUserServiceImpl implements MerchantsUserService {
         if (channelId != null){
             wrapper.eq("channel_id",channelId);
         }
+        Integer mchId = entity.getMchId();
+        if (mchId != null){
+            wrapper.eq("mch_id",mchId);
+        }
         List<MerchantsUserEntity> list = merchantsUserDao.selectList(wrapper);
         PageInfo<MerchantsUserEntity> info = new PageInfo<>(list);
         return setResultSuccess(info, Constants.SUCCESS);

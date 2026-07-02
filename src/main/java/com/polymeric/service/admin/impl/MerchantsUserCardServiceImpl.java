@@ -7,10 +7,8 @@ import com.polymeric.base.ResponseBase;
 import com.polymeric.constants.Constants;
 import com.polymeric.dao.merchants.MerchantsUserCardDao;
 import com.polymeric.entity.merchants.MerchantsUserCardEntity;
-import com.polymeric.entity.merchants.MerchantsUserEntity;
 import com.polymeric.service.admin.MerchantsUserCardService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,6 +37,15 @@ public class MerchantsUserCardServiceImpl implements MerchantsUserCardService {
     public ResponseBase findList(@RequestBody MerchantsUserCardEntity entity) {
         PageHelper.startPage(entity.getPageNumber(), entity.getPageSize());
         QueryWrapper<MerchantsUserCardEntity> wrapper = new QueryWrapper<>();
+        if (entity.getMchId() != null){
+            wrapper.eq("mch_id",entity.getMchId());
+        }
+        if (entity.getUserId() != null){
+            wrapper.eq("user_id",entity.getUserId());
+        }
+        if (entity.getCardType() != null){
+            wrapper.eq("card_type",entity.getCardType());
+        }
         List<MerchantsUserCardEntity> list = merchantsUserCardDao.selectList(wrapper);
         PageInfo<MerchantsUserCardEntity> info = new PageInfo<>(list);
         return setResultSuccess(info, Constants.SUCCESS);
