@@ -29,6 +29,18 @@ public class ChannelInfoEntity extends PageQueryHelperEntity{
 	@TableField("channel_name")
 	@ApiModelProperty(name = "channelName",value = "渠道名称",required = true,dataType = "String")
     private String channelName;
+
+	@TableField("channel_url")
+	@ApiModelProperty(name = "channelUrl",value = "渠道后台登录地址",required = true,dataType = "String")
+	private String channelUrl;
+
+	@TableField("channel_account")
+	@ApiModelProperty(name = "channelAccount",value = "渠道账户",required = true,dataType = "String")
+	private String channelAccount;
+
+	@TableField("channel_password")
+	@ApiModelProperty(name = "channelPassword",value = "渠道密码",required = true,dataType = "String")
+	private String channelPassword;
 	
 	@TableField("channel_state")
 	@ApiModelProperty(name = "channelState",value = "渠道状态",required = true,dataType = "String")

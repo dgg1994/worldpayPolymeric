@@ -16,4 +16,9 @@ public interface MerchantsCardDao extends BaseMapper<MerchantsCardEntity>{
 	@Select("select * from merchants_card where mch_id = #{mchId} and card_state = #{cardState}")
 	List<PoloMerchantBankcardRes> findMchId(@Param("mchId") Integer mchId,@Param("cardState") Integer cardState);
 
+	@Select("select mc.*,mi.merchants_namme as mchName from merchants_card mc left join merchants_info mi on mi.id = mc.mch_id where mc.mch_id = #{id}")
+    List<MerchantsCardEntity> selectListAll(@Param("id") Integer id);
+
+	@Select("select mc.*,mi.merchants_namme as mchName from merchants_card mc left join merchants_info mi on mi.id = mc.mch_id")
+	List<MerchantsCardEntity> selectCardList(MerchantsCardEntity entity);
 }

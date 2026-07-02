@@ -7,7 +7,7 @@ import com.polymeric.base.ResponseBase;
 import com.polymeric.constants.Constants;
 import com.polymeric.dao.channel.ChannelInfoDao;
 import com.polymeric.entity.channel.ChannelInfoEntity;
-import com.polymeric.entity.merchants.MerchantsIpEntity;
+import com.polymeric.service.admin.ChannelCardService;
 import com.polymeric.service.admin.ChannelService;
 import com.polymeric.utils.GenericityUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -38,6 +38,9 @@ public class ChannelServiceImpl implements ChannelService {
     @Resource
     private ChannelInfoDao channelInfoDao;
 
+    @Resource
+    private ChannelCardService channelCardService;
+
     @Override
     public ResponseBase add(@RequestBody ChannelInfoEntity entity) throws InvocationTargetException, IllegalAccessException {
         // 不能重复添加
@@ -51,6 +54,9 @@ public class ChannelServiceImpl implements ChannelService {
         entity.setChannelState(1);
         GenericityUtil.setDate(entity);
         channelInfoDao.insert(entity);
+        //拉去上游产品
+        Integer id = channelInfoDao.selectByAppIdAndChannelCode(entity.getChannelCode(),entity.getAppId());
+        channelCardService.pull(id);
         return setResultSuccess();
     }
 

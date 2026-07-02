@@ -1,11 +1,23 @@
 package com.polymeric.service.admin.impl;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.polymeric.dao.channel.ChannelCardDao;
+import com.polymeric.dao.channel.ChannelInfoDao;
+import com.polymeric.dao.merchants.MerchantsCardDao;
+import com.polymeric.entity.channel.ChannelCardEntity;
+import com.polymeric.entity.channel.ChannelInfoEntity;
+import com.polymeric.entity.merchants.MerchantsCardEntity;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,6 +51,7 @@ import com.polymeric.utils.sign.KeyPairUtil;
 @RestController
 @Transactional
 @CrossOrigin
+@Slf4j
 public class MerchantsServiceImpl extends BaseApiService implements MerchantsService{
 	
 	@Autowired
@@ -49,6 +62,15 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
 	
 	@Autowired
 	private MerchantsIpDao merchantsIpDao;
+
+	@Autowired
+	private MerchantsCardDao merchantsCardDao;
+
+	@Autowired
+	private ChannelCardDao channelCardDao;
+
+	@Autowired
+	private ChannelInfoDao channelInfoDao;
 	
 	@Autowired
 	SysUserDao sysUserDao;
@@ -202,9 +224,71 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
 			throw new RuntimeException();
 		}
 	}
-	
-	
+
+	@Override
+	public ResponseBase findById(Integer id) {
+		List<MerchantsCardEntity> merchantsCardEntities = merchantsCardDao.selectListAll(id);
+		if (merchantsCardEntities == null){
+			merchantsCardEntities = new ArrayList<>();
+		}
+		return setResultSuccess(merchantsCardEntities,Constants.SUCCESS);
+	}
+
+	@Override
+	public ResponseBase assignChannel(@RequestParam Integer id, @RequestParam Integer channelId, @RequestParam List<Integer> channelCardsId) throws InvocationTargetException, IllegalAccessException {
+		if (id == null) {
+			return setResultError("商户id不能为空");
+		}
+		if (channelId == null) {
+			return setResultError("上游id不能为空");
+		}
+		MerchantsInfoEntity merchantsInfoEntity = merchantsInfoDao.selectById(id);
+		if (merchantsInfoEntity == null) {
+			return setResultError("商户信息不存在");
+		}
+		ChannelInfoEntity channelInfoEntity = channelInfoDao.selectById(channelId);
+		if (channelInfoEntity == null) {
+			return setResultError("上游信息不存在");
+		}
+		if (!Integer.valueOf(1).equals(channelInfoEntity.getChannelState())) {
+			return setResultError("上游已停用，无法分配");
+		}
+		merchantsInfoEntity.setChannelId(channelInfoEntity.getId());
+		merchantsInfoEntity.setChannelCode(channelInfoEntity.getChannelCode());
+		merchantsInfoEntity.setGmtModified(new Date());
+		merchantsInfoDao.updateById(merchantsInfoEntity);
+
+		if (CollectionUtils.isEmpty(channelCardsId)) {
+			return setResultSuccess();
+		}
+		List<ChannelCardEntity> channelCardList = channelCardDao.selectBatchIds(channelCardsId);
+		if (channelCardList.size() != channelCardsId.size()) {
+			return setResultError("部分上游卡不存在，请确认卡片信息");
+		}
+		for (ChannelCardEntity channelCardEntity : channelCardList) {
+			if (!channelId.equals(channelCardEntity.getChannelId())) {
+				return setResultError("上游卡与指定上游不匹配，cardId：" + channelCardEntity.getId());
+			}
+			QueryWrapper<MerchantsCardEntity> wrapper = new QueryWrapper<>();
+			wrapper.eq("mch_id", id).eq("channel_card_id", channelCardEntity.getId());
+			if (merchantsCardDao.selectCount(wrapper) > 0) {
+				log.info("商户已分配该上游卡，跳过，mchId：{}，channelCardId：{}", id, channelCardEntity.getId());
+				continue;
+			}
+			MerchantsCardEntity merchantsCardEntity = new MerchantsCardEntity();
+			BeanUtils.copyProperties(channelCardEntity, merchantsCardEntity);
+			merchantsCardEntity.setId(null);
+			merchantsCardEntity.setMchName(merchantsInfoEntity.getMerchantsNamme());
+			merchantsCardEntity.setChannelCardId(channelCardEntity.getId());
+			merchantsCardEntity.setMchId(merchantsInfoEntity.getId());
+			merchantsCardEntity.setMchAppid(merchantsInfoEntity.getAppId());
+			merchantsCardEntity.setChannelId(channelInfoEntity.getId());
+			merchantsCardEntity.setChannelCode(channelInfoEntity.getChannelCode());
+			GenericityUtil.setDate(merchantsCardEntity);
+			merchantsCardDao.insert(merchantsCardEntity);
+		}
+		return setResultSuccess();
+	}
 
 
-	
 }

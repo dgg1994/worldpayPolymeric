@@ -10,6 +10,9 @@ import com.polymeric.entity.merchants.MerchantsInfoEntity;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+
 @RequestMapping("/merchants")
 @Api(value = "商户管理",tags = "商户管理")
 public interface MerchantsService {
@@ -33,6 +36,14 @@ public interface MerchantsService {
 	@GetMapping("/updateKey")
 	@ApiOperation(value = "更新商户密钥", notes = "更新商户密钥", response = ResponseBase.class)
 	ResponseBase updateKey(Integer id);
+
+	@GetMapping("/findById")
+	@ApiOperation(value = "根据商户id查询商户商品", notes = "根据商户id查询商户商品", response = ResponseBase.class)
+	ResponseBase findById(Integer id);
+
+	@GetMapping("/assignChannel")
+	@ApiOperation(value = "分配上游商品", notes = "分配上游商品", response = ResponseBase.class)
+	ResponseBase assignChannel(Integer id, Integer channelId, List<Integer> channelCardsId) throws InvocationTargetException, IllegalAccessException;
 	
 
 

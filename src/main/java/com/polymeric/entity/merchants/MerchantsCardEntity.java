@@ -99,4 +99,8 @@ public class MerchantsCardEntity extends PageQueryHelperEntity{
 	@ApiModelProperty(name = "cardState",value = "上下架状态1正常2下架",required = true,dataType = "Integer")
 	private Integer cardState;
 
+	@TableField(exist = false)
+	@ApiModelProperty(name = "mchName",value = "商户名称",required = true,dataType = "String")
+	private String mchName;
+
 }
