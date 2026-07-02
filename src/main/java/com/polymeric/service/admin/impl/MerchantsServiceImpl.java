@@ -1,17 +1,38 @@
 package com.polymeric.service.admin.impl;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.pagehelper.PageInfo;
+import com.polymeric.base.BaseApiService;
+import com.polymeric.base.ResponseBase;
+import com.polymeric.constants.Constants;
 import com.polymeric.dao.channel.ChannelCardDao;
 import com.polymeric.dao.channel.ChannelInfoDao;
+import com.polymeric.dao.finance.FinanceRechargeRecordDao;
 import com.polymeric.dao.merchants.MerchantsCardDao;
+import com.polymeric.dao.merchants.MerchantsInfoDao;
+import com.polymeric.dao.merchants.MerchantsIpDao;
+import com.polymeric.dao.merchants.MerchantsKeyDao;
+import com.polymeric.dao.system.SysRoleDao;
+import com.polymeric.dao.system.SysUserDao;
 import com.polymeric.entity.channel.ChannelCardEntity;
 import com.polymeric.entity.channel.ChannelInfoEntity;
+import com.polymeric.entity.finance.FinanceRechargeRecordEntity;
 import com.polymeric.entity.merchants.MerchantsCardEntity;
+import com.polymeric.entity.merchants.MerchantsInfoEntity;
+import com.polymeric.entity.merchants.MerchantsIpEntity;
+import com.polymeric.entity.merchants.MerchantsKeyEntity;
+import com.polymeric.entity.system.SysRoleEntity;
+import com.polymeric.entity.system.SysUserEntity;
+import com.polymeric.enums.RecordTypeEnums;
+import com.polymeric.enums.RoleTypeEnums;
+import com.polymeric.enums.TxStatusEnums;
+import com.polymeric.enums.UserStateEnums;
+import com.polymeric.query.admin.MerchantsFinanceQuery;
+import com.polymeric.response.sign.KeyPairResult;
+import com.polymeric.service.admin.MerchantsService;
+import com.polymeric.utils.GenericityUtil;
+import com.polymeric.utils.GoogleAuthenticatorUtil;
+import com.polymeric.utils.sign.KeyPairUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -23,29 +44,11 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-import com.polymeric.base.BaseApiService;
-import com.polymeric.base.ResponseBase;
-import com.polymeric.constants.Constants;
-import com.polymeric.dao.merchants.MerchantsInfoDao;
-import com.polymeric.dao.merchants.MerchantsIpDao;
-import com.polymeric.dao.merchants.MerchantsKeyDao;
-import com.polymeric.dao.system.SysRoleDao;
-import com.polymeric.dao.system.SysUserDao;
-import com.polymeric.entity.merchants.MerchantsInfoEntity;
-import com.polymeric.entity.merchants.MerchantsIpEntity;
-import com.polymeric.entity.merchants.MerchantsKeyEntity;
-import com.polymeric.entity.system.SysRoleEntity;
-import com.polymeric.entity.system.SysUserEntity;
-import com.polymeric.enums.RoleTypeEnums;
-import com.polymeric.enums.UserStateEnums;
-import com.polymeric.response.pub.PublicRes;
-import com.polymeric.response.sign.KeyPairResult;
-import com.polymeric.service.admin.MerchantsService;
-import com.polymeric.utils.GenericityUtil;
-import com.polymeric.utils.GoogleAuthenticatorUtil;
-import com.polymeric.utils.sign.KeyPairUtil;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 
 @RestController
@@ -71,6 +74,9 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
 
 	@Autowired
 	private ChannelInfoDao channelInfoDao;
+
+	@Autowired
+	private FinanceRechargeRecordDao financeRechargeRecordDao;
 	
 	@Autowired
 	SysUserDao sysUserDao;
@@ -287,6 +293,30 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
 			GenericityUtil.setDate(merchantsCardEntity);
 			merchantsCardDao.insert(merchantsCardEntity);
 		}
+		return setResultSuccess();
+	}
+
+	@Override
+	public ResponseBase topUp(@RequestBody MerchantsFinanceQuery merchantsFinanceQuery) throws InvocationTargetException, IllegalAccessException {
+		Integer mchId = merchantsFinanceQuery.getMchId();
+		if (mchId == null){
+			return setResultError("商户id不能为空，当前交易无效");
+		}
+		//获取商户信息
+		MerchantsInfoEntity merchantsInfoEntity = merchantsInfoDao.selectById(mchId);
+		if (merchantsInfoEntity == null){
+			return setResultError("商户不存在，当前交易无效");
+		}
+		//新增充值记录
+		FinanceRechargeRecordEntity entity = new FinanceRechargeRecordEntity();
+		entity.setMerchantId(String.valueOf(merchantsFinanceQuery.getMchId()));
+		entity.setFinanceAddress(merchantsFinanceQuery.getMerchantsAddress());
+		entity.setAmount(merchantsFinanceQuery.getMerchantsAmount());
+		entity.setTxStatus(TxStatusEnums.WAIT.getIndex().toString());
+		entity.setRecordType(RecordTypeEnums.MANUAL.getIndex().toString());
+		entity.setOperator(merchantsFinanceQuery.getOperator());
+		GenericityUtil.setDate(entity);
+		financeRechargeRecordDao.insert(entity);
 		return setResultSuccess();
 	}
 

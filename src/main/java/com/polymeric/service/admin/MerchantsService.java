@@ -1,5 +1,6 @@
 package com.polymeric.service.admin;
 
+import com.polymeric.query.admin.MerchantsFinanceQuery;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,7 +45,9 @@ public interface MerchantsService {
 	@GetMapping("/assignChannel")
 	@ApiOperation(value = "分配上游商品", notes = "分配上游商品", response = ResponseBase.class)
 	ResponseBase assignChannel(Integer id, Integer channelId, List<Integer> channelCardsId) throws InvocationTargetException, IllegalAccessException;
-	
 
+	@PostMapping("/topUp")
+	@ApiOperation(value = "商户充值", notes = "商户充值", response = ResponseBase.class)
+	ResponseBase topUp(MerchantsFinanceQuery merchantsFinanceQuery) throws InvocationTargetException, IllegalAccessException;
 
 }
