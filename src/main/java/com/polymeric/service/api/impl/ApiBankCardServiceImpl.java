@@ -24,17 +24,20 @@ import com.polymeric.dao.channel.ChannelCardDao;
 import com.polymeric.dao.merchants.MerchantsCardDao;
 import com.polymeric.dao.merchants.MerchantsInfoDao;
 import com.polymeric.dao.merchants.MerchantsUserCardDao;
-import com.polymeric.dao.order.OpenCardOrderDao;
+import com.polymeric.dao.order.MerchantsOrderDao;
+import com.polymeric.dao.order.OrderIncomeListDao;
 import com.polymeric.entity.channel.ChannelCardEntity;
 import com.polymeric.entity.merchants.MerchantsCardEntity;
 import com.polymeric.entity.merchants.MerchantsInfoEntity;
 import com.polymeric.entity.merchants.MerchantsUserCardEntity;
-import com.polymeric.entity.order.OpenCardOrderEntity;
+import com.polymeric.entity.order.MerchantsOrderEntity;
+import com.polymeric.entity.order.OrderIncomeListEntity;
 import com.polymeric.enums.CardStateEnums;
 import com.polymeric.enums.CardTypeEnums;
 import com.polymeric.enums.ChannelCodeEnums;
 import com.polymeric.enums.ErrorCodeEnum;
 import com.polymeric.enums.OrderStatusEnum;
+import com.polymeric.enums.OrderTypeEnum;
 import com.polymeric.enums.PublicEnums;
 import com.polymeric.query.api.ApiActiveQuery;
 import com.polymeric.query.api.ApiCardApplyQuery;
@@ -65,10 +68,13 @@ public class ApiBankCardServiceImpl extends BaseApiService implements ApiBankCar
 	private ChannelCardDao channelCardDao;
 	
 	@Autowired
-	private OpenCardOrderDao openCardOrderDao;
+	private OrderIncomeListDao orderIncomeListDao;
 	
 	@Autowired
 	private MerchantsInfoDao merchantsInfoDao;
+	
+	@Autowired
+	private MerchantsOrderDao merchantsOrderDao;
 
 	@Override
 	public ResponseBase merchantBankCardList(HttpServletRequest request) {
@@ -199,7 +205,7 @@ public class ApiBankCardServiceImpl extends BaseApiService implements ApiBankCar
 			PoloApplyCardRes applyCardRes = JSONObject.parseObject(JSON.toJSONString(base.getData()), PoloApplyCardRes.class);
 			this.addMchUserCard(infoEntity, cardEntity, applyCardRes);
 			//开卡费用处理
-			this.openCardAmount(infoEntity, cardEntity, applyCardRes,OrderStatusEnum.SUCCESS.getCode());
+			this.openCardAmount(infoEntity, cardEntity, applyCardRes,OrderStatusEnum.WAIT_PAY.getCode());
 			return base;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -417,7 +423,8 @@ public class ApiBankCardServiceImpl extends BaseApiService implements ApiBankCar
 	 */
 	public void openCardAmount(MerchantsInfoEntity infoEntity,MerchantsCardEntity cardEntity,PoloApplyCardRes applyCardRes,Integer orderState) {
 		try {
-			OpenCardOrderEntity cardOrderEntity = new OpenCardOrderEntity();
+			//平台收益记录
+			OrderIncomeListEntity cardOrderEntity = new OrderIncomeListEntity();
 			cardOrderEntity.setOrderNum(OrderCodeFactory.getOrderCode(Long.parseLong(infoEntity.getMerchantsUserData().getApiUid())));
 			cardOrderEntity.setChannelId(infoEntity.getChannelId());
 			cardOrderEntity.setChannelCode(infoEntity.getChannelCode());
@@ -429,24 +436,46 @@ public class ApiBankCardServiceImpl extends BaseApiService implements ApiBankCar
 			cardOrderEntity.setCardApiId(cardEntity.getCardId());
 			cardOrderEntity.setUserBankcardId(applyCardRes.getUserBankcardId());
 			cardOrderEntity.setCardType(cardEntity.getBankCardNature());
+			cardOrderEntity.setOrderAmount(cardEntity.getApplyFee());
+			cardOrderEntity.setOrderType(OrderTypeEnum.OPEN_CARD.getCode());
 			ChannelCardEntity channelCardEntity = channelCardDao.selectById(cardEntity.getChannelCardId());
 			if(channelCardEntity != null) {
-				cardOrderEntity.setChannelOpenAmount(channelCardEntity.getApplyFee());				
+				cardOrderEntity.setChannelAmount(channelCardEntity.getApplyFee());		
 			}
-			cardOrderEntity.setMchOpenAmount(cardEntity.getApplyFee());
-			cardOrderEntity.setProfitAmount(BigDecimalUtils.subtract(cardOrderEntity.getMchOpenAmount(), cardOrderEntity.getChannelOpenAmount()));
+			cardOrderEntity.setChannelRates(BigDecimal.ZERO);//开卡没有费率
+			cardOrderEntity.setSysRates(BigDecimal.ZERO);//开卡没有费率
+			cardOrderEntity.setSysAmount(cardEntity.getApplyFee());
+			cardOrderEntity.setProfitAmount(BigDecimalUtils.subtract(cardOrderEntity.getSysAmount(), cardOrderEntity.getChannelAmount()));
 			cardOrderEntity.setOrderState(orderState);
 			GenericityUtil.setDate(cardOrderEntity);
-			openCardOrderDao.insert(cardOrderEntity);
+			orderIncomeListDao.insert(cardOrderEntity);
+			//交易前商户余额
+			BigDecimal beforeAmount = infoEntity.getAvailableAmount();
+			//商户余额修改
 			if(OrderStatusEnum.WAIT_PAY.getCode().equals(orderState)) {//处理中
 				//商户余额处理
-				infoEntity.setAvailableAmount(BigDecimalUtils.subtract(infoEntity.getAvailableAmount(), cardOrderEntity.getMchOpenAmount()));
-				infoEntity.setFreezeAmount(BigDecimalUtils.subtract(infoEntity.getFreezeAmount(), cardOrderEntity.getMchOpenAmount()));
+				infoEntity.setAvailableAmount(BigDecimalUtils.subtract(infoEntity.getAvailableAmount(), cardOrderEntity.getSysAmount()));
+				infoEntity.setFreezeAmount(BigDecimalUtils.add(infoEntity.getFreezeAmount(), cardOrderEntity.getSysAmount()));
+				System.out.println(infoEntity.getFreezeAmount());
 				merchantsInfoDao.updateById(infoEntity);
 			}else if(OrderStatusEnum.SUCCESS.getCode().equals(orderState)) {
-				infoEntity.setAvailableAmount(BigDecimalUtils.subtract(infoEntity.getAvailableAmount(), cardOrderEntity.getMchOpenAmount()));
+				infoEntity.setAvailableAmount(BigDecimalUtils.subtract(infoEntity.getAvailableAmount(), cardOrderEntity.getSysAmount()));
 				merchantsInfoDao.updateById(infoEntity);
 			}
+			//新增商户资金明细记录
+			MerchantsOrderEntity merchantsOrderEntity = new MerchantsOrderEntity();
+			merchantsOrderEntity.setOrderNum(OrderCodeFactory.getOrderCode(null));
+			merchantsOrderEntity.setMchId(infoEntity.getId());
+			merchantsOrderEntity.setMchAppid(infoEntity.getAppId());
+			merchantsOrderEntity.setTradeType(OrderTypeEnum.OPEN_CARD.getLable());
+			merchantsOrderEntity.setOrderType(OrderTypeEnum.OPEN_CARD.getCode());
+			merchantsOrderEntity.setOrderAmount(cardEntity.getApplyFee());
+			merchantsOrderEntity.setActualAmount(cardEntity.getApplyFee());
+			merchantsOrderEntity.setBeforeAmount(beforeAmount);
+			merchantsOrderEntity.setAfterAmount(infoEntity.getAvailableAmount());
+			merchantsOrderEntity.setOrderState(orderState);
+			GenericityUtil.setDate(merchantsOrderEntity);
+			merchantsOrderDao.insert(merchantsOrderEntity);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException();
