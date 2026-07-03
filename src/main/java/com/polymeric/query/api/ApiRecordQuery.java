@@ -1,5 +1,7 @@
 package com.polymeric.query.api;
 
+import com.polymeric.constants.Constants;
+
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -8,16 +10,11 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class ApiRecordQuery extends ApiBankCardIdQuery{
 	
-    @ApiModelProperty(name = "pageNum", value = "页码，默认第一页", required = true, dataType = "Integer")
-    private Integer pageNum;
+	@ApiModelProperty(name = "pageNumber",value = "分页页码",required = false,dataType = "Integer")
+	private Integer pageNumber = Constants.PAGENUMBER;
+	
+	@ApiModelProperty(name = "pageSize",value = "分页数量",required = false,dataType = "Integer")
+	private Integer pageSize =Constants.PAGESIZE;
     
-    @ApiModelProperty(name = "pageSize", value = "每页数量，默认10条", required = true, dataType = "Integer")
-    private Integer pageSize;
-    
-    @ApiModelProperty(name = "startTime", value = "开始时间，时间戳毫秒数", required = true, dataType = "Long")
-    private Long startTime;
-    
-    @ApiModelProperty(name = "endTime", value = "结束时间，时间戳毫秒数", required = true, dataType = "Long")
-    private Long endTime;
 
 }

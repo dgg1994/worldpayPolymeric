@@ -7,14 +7,17 @@ import lombok.Data;
 @Data
 public class PoloMerchantBankcardRes {
 	
+	@ApiModelProperty(name = "id",value = "卡片id",required = true,dataType = "String")
+	private Integer id;
+	
 	@ApiModelProperty(name = "mchAppid",value = "商户编号",required = true,dataType = "String")
     private String mchAppid;
 	
 	@ApiModelProperty(name = "cardTitle",value = "卡标题名称",required = true,dataType = "String")
     private String cardTitle;
 
-	@ApiModelProperty(name = "cardId",value = "三方卡片id",required = true,dataType = "String")
-	private Integer cardId;
+//	@ApiModelProperty(name = "cardId",value = "三方卡片id",required = true,dataType = "String")
+//	private Integer cardId;
 	
 	@ApiModelProperty(name = "cardBin",value = "关联BIN码",required = true,dataType = "String")
 	private String cardBin;

@@ -55,5 +55,26 @@ public interface PoloMethods {
     
     //查询银行卡交易记录
     public static String BANKCARD_TRADE_DETAILS= "/bankcard/trade/details";
+    
+    //3ds授权通过
+    public static String BANKCARD_3DS_APPROVE= "/bankcard/3ds/approve";
+    
+    //3ds授权拒绝
+    public static String BANKCARD_3DS_REJECT= "/bankcard/3ds/reject";
+    
+    //查询邮寄地区列表
+    public static String DELIVERY_REGION= "/delivery/region";
+    
+    //添加邮寄地址
+    public static String DELIVERY_ADDRESS_ADD= "/delivery/address/add";
+    
+    //更新邮寄地址
+    public static String DELIVERY_ADDRESS_PDATE= "/delivery/address/update";
+    
+    //查询邮寄信息
+    public static String DELIVERY_INFO= "/delivery/info";
+    
+    //查询商户资产
+    public static String MERCHANT_BALANCE= "/merchant/balance";
 
 }

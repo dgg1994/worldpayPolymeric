@@ -216,11 +216,13 @@ public class ApiBankCardServiceImpl extends BaseApiService implements ApiBankCar
 			if(!Constants.HTTP_RES_CODE_200.equals(base.getCode())) {
 				return base;
 			}
-			//新增商户用户银行卡
-			PoloApplyCardRes applyCardRes = JSONObject.parseObject(JSON.toJSONString(base.getData()), PoloApplyCardRes.class);
-			this.addMchUserCard(infoEntity, cardEntity, applyCardRes,CardStateEnums.WAITING_ACTIVATE.getIndex());
-			//开卡费用处理
-			this.openCardAmount(infoEntity, cardEntity, applyCardRes,OrderStatusEnum.PROCESSING.getCode());
+			if(cardApplyQuery.getDeliveryAddressId() == null) {
+				//新增商户用户银行卡
+				PoloApplyCardRes applyCardRes = JSONObject.parseObject(JSON.toJSONString(base.getData()), PoloApplyCardRes.class);
+				this.addMchUserCard(infoEntity, cardEntity, applyCardRes,CardStateEnums.WAITING_ACTIVATE.getIndex());
+				//开卡费用处理
+				this.openCardAmount(infoEntity, cardEntity, applyCardRes,OrderStatusEnum.PROCESSING.getCode());
+			}
 			return base;
 		} catch (Exception e) {
 			e.printStackTrace();
