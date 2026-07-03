@@ -2,6 +2,8 @@ package com.polymeric.service.admin.impl;
 
 import java.util.Date;
 import java.util.List;
+
+import com.polymeric.utils.TokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -42,12 +44,18 @@ public class MerchantsWebHookMsgServiceImpl extends BaseApiService implements Me
 	
 	@Autowired
 	private MerchantsKeyDao merchantsKeyDao;
+
+	@Autowired
+	private TokenUtils tokenUtils;
 	
 	private static final int[] RETRY_INTERVALS = {60,90,120,180,300,360,420,480,600,600};
 
 	@Override
 	public ResponseBase findList(@RequestBody MerchantsWebHookMsgEntity entity) {
 		try {
+			if (!tokenUtils.isAdmin()){
+				entity.setMchAppid(tokenUtils.getMerchantAppId());
+			}
 			if(entity.getSysAccountId() != null) {
 				MerchantsInfoEntity infoEntity = merchantsInfoDao.findBySysAccountId(entity.getSysAccountId());
 				if(infoEntity != null) {

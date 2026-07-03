@@ -16,7 +16,9 @@ import com.polymeric.enums.UniversalEnums;
 import com.polymeric.enums.UserStateEnums;
 import com.polymeric.service.admin.FinanceService;
 import com.polymeric.utils.GenericityUtil;
+import com.polymeric.utils.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jsqlparser.parser.Token;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,6 +53,9 @@ public class FinanceServiceImpl implements FinanceService {
 
     @Resource
     private MerchantsInfoDao merchantsInfoDao;
+
+    @Resource
+    private TokenUtils tokenUtils;
 
     @Override
     public ResponseBase financeList() {
@@ -95,6 +100,9 @@ public class FinanceServiceImpl implements FinanceService {
     @Override
     public ResponseBase recordList(@RequestBody FinanceRechargeRecordEntity entity) {
         PageHelper.startPage(entity.getPageNumber(), entity.getPageSize());
+        if (!tokenUtils.isAdmin()){
+            entity.setMerchantId(String.valueOf(tokenUtils.getMerchantId()));
+        }
         List<FinanceRechargeRecordEntity> list = financeRechargeRecordDao.selectAll(entity);
         PageInfo<FinanceRechargeRecordEntity> info = new PageInfo<>(list);
         return setResultSuccess(info, Constants.SUCCESS);

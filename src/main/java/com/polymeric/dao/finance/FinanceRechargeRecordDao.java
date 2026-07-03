@@ -28,6 +28,9 @@ public interface FinanceRechargeRecordDao extends BaseMapper<FinanceRechargeReco
             "   <if test='entity.txStatus != null and entity.txStatus != \"\"'> " +
             "       and frr.tx_status = #{entity.txStatus} " +
             "   </if> " +
+            "   <if test='entity.merchantId != null and entity.merchantId != \"\"'> " +
+            "       and frr.merchant_id = #{entity.merchantId} " +
+            "   </if> " +
             "</where> " +
             "order by frr.setTime desc " +
             "</script>")

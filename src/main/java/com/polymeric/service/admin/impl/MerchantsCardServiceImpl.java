@@ -9,6 +9,7 @@ import com.polymeric.dao.merchants.MerchantsCardDao;
 import com.polymeric.entity.channel.ChannelInfoEntity;
 import com.polymeric.entity.merchants.MerchantsCardEntity;
 import com.polymeric.service.admin.MerchantsCardService;
+import com.polymeric.utils.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -36,6 +37,9 @@ public class MerchantsCardServiceImpl implements MerchantsCardService {
     @Resource
     private MerchantsCardDao merchantsCardDao;
 
+    @Resource
+    private TokenUtils tokenUtils;
+
     @Override
     public ResponseBase update(@RequestBody MerchantsCardEntity entity) {
         Integer id = entity.getId();
@@ -50,6 +54,9 @@ public class MerchantsCardServiceImpl implements MerchantsCardService {
     @Override
     public ResponseBase findList(@RequestBody MerchantsCardEntity entity) {
         PageHelper.startPage(entity.getPageNumber(), entity.getPageSize());
+        if (!tokenUtils.isAdmin()){
+            entity.setMchId(tokenUtils.getMerchantId());
+        }
         List<MerchantsCardEntity> list = merchantsCardDao.selectCardList(entity);
         PageInfo<MerchantsCardEntity> info = new PageInfo<>(list);
         return setResultSuccess(info, Constants.SUCCESS);

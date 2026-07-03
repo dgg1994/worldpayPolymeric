@@ -32,6 +32,7 @@ import com.polymeric.response.sign.KeyPairResult;
 import com.polymeric.service.admin.MerchantsService;
 import com.polymeric.utils.GenericityUtil;
 import com.polymeric.utils.GoogleAuthenticatorUtil;
+import com.polymeric.utils.TokenUtils;
 import com.polymeric.utils.sign.KeyPairUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -83,6 +84,9 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
 	
 	@Autowired
 	private SysRoleDao sysRoleDao;
+
+	@Autowired
+	private TokenUtils tokenUtils;
 
 	@Override
 	public ResponseBase add(@RequestBody MerchantsInfoEntity entity) {
@@ -178,6 +182,9 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
 				wrapper.eq("merchants_status",merchantsStatus);
 			}
 			wrapper.orderByDesc("setTime");
+            if (!tokenUtils.isAdmin()) {
+				wrapper.eq("merchants_account",tokenUtils.getUsername());
+            }
 			List<MerchantsInfoEntity> list = merchantsInfoDao.selectList(wrapper);
 			if(list != null && !list.isEmpty()) {
 				for (MerchantsInfoEntity merchantsInfoEntity : list) {

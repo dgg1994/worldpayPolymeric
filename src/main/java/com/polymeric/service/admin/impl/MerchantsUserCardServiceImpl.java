@@ -8,6 +8,7 @@ import com.polymeric.constants.Constants;
 import com.polymeric.dao.merchants.MerchantsUserCardDao;
 import com.polymeric.entity.merchants.MerchantsUserCardEntity;
 import com.polymeric.service.admin.MerchantsUserCardService;
+import com.polymeric.utils.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -33,6 +34,9 @@ public class MerchantsUserCardServiceImpl implements MerchantsUserCardService {
 
     @Resource
     private MerchantsUserCardDao merchantsUserCardDao;
+
+    @Resource
+    private TokenUtils tokenUtils;
     @Override
     public ResponseBase findList(@RequestBody MerchantsUserCardEntity entity) {
         PageHelper.startPage(entity.getPageNumber(), entity.getPageSize());
@@ -40,11 +44,14 @@ public class MerchantsUserCardServiceImpl implements MerchantsUserCardService {
         if (entity.getMchId() != null){
             wrapper.eq("mch_id",entity.getMchId());
         }
-        if (entity.getUserId() != null){
-            wrapper.eq("user_id",entity.getUserId());
+        if (entity.getUserUid() != null){
+            wrapper.eq("user_uid",entity.getUserUid());
         }
         if (entity.getCardType() != null){
             wrapper.eq("card_type",entity.getCardType());
+        }
+        if (!tokenUtils.isAdmin()) {
+            wrapper.eq("mch_id",tokenUtils.getMerchantId());
         }
         List<MerchantsUserCardEntity> list = merchantsUserCardDao.selectList(wrapper);
         PageInfo<MerchantsUserCardEntity> info = new PageInfo<>(list);

@@ -8,6 +8,7 @@ import com.polymeric.constants.Constants;
 import com.polymeric.dao.merchants.MerchantsUserDao;
 import com.polymeric.entity.merchants.MerchantsUserEntity;
 import com.polymeric.service.admin.MerchantsUserService;
+import com.polymeric.utils.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,9 @@ public class MerchantsUserServiceImpl implements MerchantsUserService {
     @Resource
     private MerchantsUserDao merchantsUserDao;
 
+    @Resource
+    private TokenUtils tokenUtils;
+
     @Override
     public ResponseBase findList(@RequestBody  MerchantsUserEntity entity) {
         PageHelper.startPage(entity.getPageNumber(), entity.getPageSize());
@@ -50,6 +54,9 @@ public class MerchantsUserServiceImpl implements MerchantsUserService {
         Integer mchId = entity.getMchId();
         if (mchId != null){
             wrapper.eq("mch_id",mchId);
+        }
+        if (!tokenUtils.isAdmin()) {
+            wrapper.eq("mch_id",tokenUtils.getMerchantId());
         }
         List<MerchantsUserEntity> list = merchantsUserDao.selectList(wrapper);
         PageInfo<MerchantsUserEntity> info = new PageInfo<>(list);
