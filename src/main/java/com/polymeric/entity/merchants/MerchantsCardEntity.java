@@ -103,4 +103,20 @@ public class MerchantsCardEntity extends PageQueryHelperEntity{
 	@ApiModelProperty(name = "mchName",value = "商户名称",required = true,dataType = "String")
 	private String mchName;
 
+	@TableField(exist = false)
+	@ApiModelProperty(name = "channelApplyFee",value = "上游开卡费用，开卡一次收取",required = true,dataType = "String")
+	private BigDecimal channelApplyFee;
+
+	@TableField(exist = false)
+	@ApiModelProperty(name = "channelRechargeFee",value = "上游充值手续费比例，0-1之间",required = true,dataType = "String")
+	private BigDecimal channelRechargeFee;
+
+	@TableField(exist = false)
+	@ApiModelProperty(name = "channelActiveMinLimit",value = "上游虚拟卡激活首次充值最小金额",required = true,dataType = "String")
+	private BigDecimal channelActiveMinLimit;
+
+	@TableField(exist = false)
+	@ApiModelProperty(name = "channelRechargeMinLimit",value = "上游单笔充值最小金额",required = true,dataType = "String")
+	private BigDecimal channelRechargeMinLimit;
+
 }

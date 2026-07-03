@@ -121,7 +121,7 @@ public class FinanceServiceImpl implements FinanceService {
             if (merchantsInfoEntity == null){
                 return setResultError("商户信息不存在，审核失败");
             }
-            BigDecimal availableAmount = merchantsInfoEntity.getAvailableAmount();
+            BigDecimal availableAmount = merchantsInfoEntity.getAvailableAmount() == null ? BigDecimal.ZERO : merchantsInfoEntity.getAvailableAmount();
             BigDecimal newAmount = availableAmount.add(financeRechargeRecordEntity.getAmount());
             merchantsInfoEntity.setAvailableAmount(newAmount);
             merchantsInfoEntity.setGmtModified(new Date());

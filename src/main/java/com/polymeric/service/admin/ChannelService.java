@@ -37,5 +37,9 @@ public interface ChannelService {
     @ApiOperation(value = "编辑上游状态", notes = "编辑上游状态", response = ResponseBase.class)
     ResponseBase updateState(Integer id,Integer channelStatus);
 
+    @GetMapping("/findById")
+    @ApiOperation(value = "根据id查询上游信息", notes = "根据id查询上游信息", response = ResponseBase.class)
+    ResponseBase findById(Integer id);
+
 
 }

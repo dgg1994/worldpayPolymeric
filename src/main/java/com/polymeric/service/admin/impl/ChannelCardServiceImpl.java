@@ -135,4 +135,13 @@ public class ChannelCardServiceImpl extends BaseApiService implements ChannelCar
 		return setResultSuccess();
 	}
 
+	@Override
+	public ResponseBase findById(Integer id) {
+		ChannelCardEntity channelCardEntity = channelCardDao.selectInfoById(id);
+		if (channelCardEntity == null){
+			channelCardEntity = new ChannelCardEntity();
+		}
+		return setResultSuccess(channelCardEntity);
+	}
+
 }

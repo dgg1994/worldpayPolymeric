@@ -108,4 +108,13 @@ public class ChannelServiceImpl implements ChannelService {
         channelInfoDao.updateById(channelInfoEntity);
         return setResultSuccess();
     }
+
+    @Override
+    public ResponseBase findById(Integer id) {
+        ChannelInfoEntity channelInfoEntity = channelInfoDao.selectById(id);
+        if (channelInfoEntity == null) {
+            channelInfoEntity = new ChannelInfoEntity();
+        }
+        return setResultSuccess(channelInfoEntity);
+    }
 }

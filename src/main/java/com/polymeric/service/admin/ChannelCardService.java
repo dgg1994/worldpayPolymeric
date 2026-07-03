@@ -31,4 +31,8 @@ public interface ChannelCardService {
 	@ApiOperation(value = "编辑上游产品状态", notes = "编辑上游产品状态", response = ResponseBase.class)
 	ResponseBase updateState(Integer id,Integer cardStatus);
 
+	@GetMapping("/findById")
+	@ApiOperation(value = "根据id查询上游商品信息", notes = "根据id查询上游商品信息", response = ResponseBase.class)
+	ResponseBase findById(Integer id);
+
 }

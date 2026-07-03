@@ -33,4 +33,17 @@ public interface MerchantsCardDao extends BaseMapper<MerchantsCardEntity>{
 			"</where>" +
 			"</script>")
 	List<MerchantsCardEntity> selectCardList(@Param("entity") MerchantsCardEntity entity);
+
+	@Select("select " +
+			"mc.*," +
+			"cc.apply_fee as channelApplyFee," +
+			"cc.recharge_fee as channelRechargeFee," +
+			"cc.active_min_limit as channelActiveMinLimit," +
+			"cc.recharge_min_limit as channelRechargeMinLimit, " +
+			"mi.merchants_namme AS mchName " +
+			"from merchants_card mc " +
+			"left join channel_card cc on mc.card_id = cc.card_id " +
+			"left join merchants_info mi on mi.id = mc.mch_id " +
+			"where mc.id = #{id}")
+	MerchantsCardEntity selectInfoById(@Param("id") Integer id);
 }

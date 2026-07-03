@@ -61,4 +61,13 @@ public class MerchantsCardServiceImpl implements MerchantsCardService {
         PageInfo<MerchantsCardEntity> info = new PageInfo<>(list);
         return setResultSuccess(info, Constants.SUCCESS);
     }
+
+    @Override
+    public ResponseBase findById(Integer id) {
+        MerchantsCardEntity merchantsCardEntity = merchantsCardDao.selectInfoById(id);
+        if (merchantsCardEntity == null){
+            merchantsCardEntity = new MerchantsCardEntity();
+        }
+        return setResultSuccess(merchantsCardEntity);
+    }
 }

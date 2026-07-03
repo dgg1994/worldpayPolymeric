@@ -85,6 +85,10 @@ public class ChannelCardEntity extends PageQueryHelperEntity{
 	@TableField("card_state")
 	@ApiModelProperty(name = "cardState",value = "上下架状态1正常2下架",required = true,dataType = "Integer")
 	private Integer cardState;
+
+	@TableField(exist = false)
+	@ApiModelProperty(name = "channelName",value = "上游名称",required = true,dataType = "String")
+	private String channelName;
 	
 
 }
