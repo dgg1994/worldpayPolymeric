@@ -2,7 +2,6 @@ package com.polymeric.service.api.impl;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,27 +10,19 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.polymeric.base.BaseApiService;
 import com.polymeric.base.ResponseBase;
-import com.polymeric.config.channel.PoloConfig;
-import com.polymeric.config.channel.PoloMethods;
-import com.polymeric.config.channel.UnifiedConfig;
 import com.polymeric.constants.Constants;
-import com.polymeric.dao.merchants.MerchantsInfoDao;
 import com.polymeric.entity.merchants.MerchantsInfoEntity;
 import com.polymeric.enums.ChannelCodeEnums;
 import com.polymeric.enums.ErrorCodeEnum;
 import com.polymeric.response.api.MerchantBalanceRes;
 import com.polymeric.service.api.ApiMerchantService;
 import com.polymeric.utils.I18nUtil;
-import com.polymeric.utils.sign.ApiPoloUtil;
 
 @RestController
 @Transactional
 @CrossOrigin
 public class ApiMerchantServiceImpl extends BaseApiService implements ApiMerchantService{
 	
-	@Autowired
-	private MerchantsInfoDao merchantsInfoDao;
-
 	@Override
 	public ResponseBase merchantBalance(HttpServletRequest request) {
 		try {
