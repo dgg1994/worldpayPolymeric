@@ -13,11 +13,18 @@ import com.polymeric.response.pub.ApiResponseEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -194,7 +201,7 @@ public class ApiPoloUtil extends BaseApiService {
     public static ResponseBase postData(String uId, String requestOrderId, Object object,UnifiedConfig config) {
         try {
         	
-            String url = config.getAprUrl();
+            String url = config.getApiUrl();
             log.info("请求地址：{}", url);
             String nonce = generateNonce();
             String timestamp = String.valueOf(System.currentTimeMillis());
@@ -254,7 +261,7 @@ public class ApiPoloUtil extends BaseApiService {
      */
     public static ResponseBase postFormFile(String uId, String filedName, File file,UnifiedConfig config) throws IOException {
         try {
-            String url = config.getAprUrl();
+            String url = config.getApiUrl();
             log.info("请求地址：{}", url);
             // 1. 生成随机数和时间戳
             String nonce = generateNonce();
@@ -334,5 +341,50 @@ public class ApiPoloUtil extends BaseApiService {
         }
     }
 
+	/**
+	 * 发送post请求
+	 *
+	 * @throws Exception
+	 */
+	public static String post(String url, String paramStr) {
+		InputStream in = null;
+		OutputStream os = null;
+		String result = "";
+		try {
+			// 打开和URL之间的连接
+			HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+			// 设置通用的请求属性
+			conn.setRequestProperty("accept", "*/*");
+			conn.setRequestProperty("connection", "Keep-Alive");
+			conn.setRequestProperty("Content-Type", "application/json");
+			conn.setRequestProperty("Accept", "application/json");
+			// 发送POST请求须设置
+			conn.setRequestMethod("POST");
+			conn.setDoOutput(true);
+			conn.setDoInput(true);
+			os = conn.getOutputStream();
+			// 注意编码格式，防止中文乱码
+			if (StringUtils.hasText(paramStr)) {
+				os.write(paramStr.getBytes("utf-8"));
+				os.close();
+			}
+			in = conn.getInputStream();
+			result = StreamUtils.copyToString(in, Charset.forName("utf-8"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (os != null) {
+					os.close();
+				}
+				if (in != null) {
+					in.close();
+				}
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+		return result;
+	}
     
 }

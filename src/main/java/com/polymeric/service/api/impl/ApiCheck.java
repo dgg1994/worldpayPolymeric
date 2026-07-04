@@ -183,7 +183,7 @@ public class ApiCheck extends BaseApiService {
 
 		config.setAesKey(aesKey);
 		config.setAppId(appId);
-		config.setAprUrl(aprUrl + method);
+		config.setApiUrl(aprUrl + method);
 		config.setRsaPrivateKey(privateKey);
 		return config;
 	}

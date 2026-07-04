@@ -77,4 +77,17 @@ public interface PoloMethods {
     //查询商户资产
     public static String MERCHANT_BALANCE= "/merchant/balance";
 
+    //模拟3ds
+    public static String BANKCARD_SIMULATE_3DS= "/bankcard/simulate/3ds";
+    
+    //模拟交易
+    public static String BANKCARD_SIMULATE_AUTH= "/bankcard/simulate/auth";
+    
+    //模拟结算
+    public static String BANKCARD_SIMULATE_CLEAR= "/bankcard/simulate/clear";
+    
+    //模拟退单
+    public static String BANKCARD_SIMULATE_REVERSAL= "/bankcard/simulate/reversal";
+    
+    
 }

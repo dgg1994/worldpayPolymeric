@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class UnifiedConfig {
 	
-	private String aprUrl;
+	private String apiUrl;
 	
 	private String appId;
 	
