@@ -70,4 +70,16 @@ public class MerchantsCardServiceImpl implements MerchantsCardService {
         }
         return setResultSuccess(merchantsCardEntity);
     }
+
+    @Override
+    public ResponseBase updateState(Integer id, Integer merchantsStatus) {
+        MerchantsCardEntity merchantsCardEntity = merchantsCardDao.selectById(id);
+        if (merchantsCardEntity != null){
+            merchantsCardEntity.setCardState(merchantsStatus);
+            merchantsCardDao.updateById(merchantsCardEntity);
+            return setResultSuccess();
+        }else {
+            return setResultError("商户商品不存在，请确认信息");
+        }
+    }
 }

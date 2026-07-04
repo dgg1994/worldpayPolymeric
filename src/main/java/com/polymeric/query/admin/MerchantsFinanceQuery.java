@@ -20,9 +20,6 @@ public class MerchantsFinanceQuery {
     @ApiModelProperty(name = "merchantsAddress",value = "商户充值信息",required = false,dataType = "merchantsAddress")
     private String merchantsAddress;
 
-    @ApiModelProperty(name = "operator",value = "操作人",required = false,dataType = "operator")
-    private String operator;
-
     @ApiModelProperty(name = "merchantsAmount",value = "商户充值金额",required = false,dataType = "merchantsAmount")
     private BigDecimal merchantsAmount;
 

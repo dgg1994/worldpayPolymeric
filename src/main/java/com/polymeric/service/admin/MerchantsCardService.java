@@ -30,4 +30,8 @@ public interface MerchantsCardService {
     @ApiOperation(value = "根据商品id查询商品信息", notes = "根据商品id查询商品信息", response = ResponseBase.class)
     ResponseBase findById(Integer id);
 
+    @GetMapping("/updateState")
+    @ApiOperation(value = "编辑商户商品状态", notes = "编辑商户商品状态", response = ResponseBase.class)
+    ResponseBase updateState(Integer id,Integer merchantsStatus);
+
 }

@@ -1,6 +1,7 @@
 package com.polymeric.service.admin.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.github.pagehelper.PageInfo;
 import com.polymeric.base.BaseApiService;
 import com.polymeric.base.ResponseBase;
@@ -23,10 +24,7 @@ import com.polymeric.entity.merchants.MerchantsIpEntity;
 import com.polymeric.entity.merchants.MerchantsKeyEntity;
 import com.polymeric.entity.system.SysRoleEntity;
 import com.polymeric.entity.system.SysUserEntity;
-import com.polymeric.enums.RecordTypeEnums;
-import com.polymeric.enums.RoleTypeEnums;
-import com.polymeric.enums.TxStatusEnums;
-import com.polymeric.enums.UserStateEnums;
+import com.polymeric.enums.*;
 import com.polymeric.query.admin.MerchantsFinanceQuery;
 import com.polymeric.response.sign.KeyPairResult;
 import com.polymeric.service.admin.MerchantsService;
@@ -47,9 +45,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 
 @RestController
@@ -249,16 +245,16 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
 
 	@Override
 	public ResponseBase assignChannel(@RequestParam Integer id, @RequestParam Integer channelId, @RequestParam List<Integer> channelCardsId) throws InvocationTargetException, IllegalAccessException {
-		if (id == null) {
-			return setResultError("商户id不能为空");
-		}
-		if (channelId == null) {
-			return setResultError("上游id不能为空");
-		}
+		// 1. 参数校验
+		if (id == null) return setResultError("商户id不能为空");
+		if (channelId == null) return setResultError("上游id不能为空");
+
+		// 2. 基础信息校验
 		MerchantsInfoEntity merchantsInfoEntity = merchantsInfoDao.selectById(id);
 		if (merchantsInfoEntity == null) {
 			return setResultError("商户信息不存在");
 		}
+
 		ChannelInfoEntity channelInfoEntity = channelInfoDao.selectById(channelId);
 		if (channelInfoEntity == null) {
 			return setResultError("上游信息不存在");
@@ -266,41 +262,110 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
 		if (!Integer.valueOf(1).equals(channelInfoEntity.getChannelState())) {
 			return setResultError("上游已停用，无法分配");
 		}
-		merchantsInfoEntity.setChannelId(channelInfoEntity.getId());
-		merchantsInfoEntity.setChannelCode(channelInfoEntity.getChannelCode());
-		merchantsInfoEntity.setGmtModified(new Date());
-		merchantsInfoDao.updateById(merchantsInfoEntity);
 
-		if (CollectionUtils.isEmpty(channelCardsId)) {
-			return setResultSuccess();
-		}
-		List<ChannelCardEntity> channelCardList = channelCardDao.selectBatchIds(channelCardsId);
-		if (channelCardList.size() != channelCardsId.size()) {
-			return setResultError("部分上游卡不存在，请确认卡片信息");
-		}
-		for (ChannelCardEntity channelCardEntity : channelCardList) {
-			if (!channelId.equals(channelCardEntity.getChannelId())) {
-				return setResultError("上游卡与指定上游不匹配，cardId：" + channelCardEntity.getId());
+		List<Integer> incomingChannelCardIds = CollectionUtils.isEmpty(channelCardsId)
+				? Collections.emptyList() : channelCardsId;
+
+		if (merchantsInfoEntity.getChannelId() == null) {
+			//更新上游id和编码到商户表
+			merchantsInfoEntity.setChannelId(channelInfoEntity.getId());
+			merchantsInfoEntity.setChannelCode(channelInfoEntity.getChannelCode());
+			merchantsInfoEntity.setGmtModified(new Date());
+			merchantsInfoDao.updateById(merchantsInfoEntity);
+			if (!incomingChannelCardIds.isEmpty()) {
+				addMerchantsCard(incomingChannelCardIds, merchantsInfoEntity, channelInfoEntity);
 			}
-			QueryWrapper<MerchantsCardEntity> wrapper = new QueryWrapper<>();
-			wrapper.eq("mch_id", id).eq("channel_card_id", channelCardEntity.getId());
-			if (merchantsCardDao.selectCount(wrapper) > 0) {
-				log.info("商户已分配该上游卡，跳过，mchId：{}，channelCardId：{}", id, channelCardEntity.getId());
+		} else {
+			syncMerchantsCards(incomingChannelCardIds, merchantsInfoEntity, channelInfoEntity);
+		}
+
+		return setResultSuccess();
+	}
+
+	/**
+	 * 同步商户商品：传入比库中多则新增，库中比传入多则禁用，已禁用再次选中则恢复
+	 */
+	private void syncMerchantsCards(List<Integer> channelCardsId,
+	                                MerchantsInfoEntity merchantsInfoEntity,
+	                                ChannelInfoEntity channelInfoEntity) throws InvocationTargetException, IllegalAccessException {
+		Set<Integer> incomingSet = new HashSet<>(channelCardsId);
+		List<MerchantsCardEntity> existingCards = merchantsCardDao.selectListAll(merchantsInfoEntity.getId());
+		Map<Integer, MerchantsCardEntity> existingByChannelCardId = new HashMap<>();
+		if (!CollectionUtils.isEmpty(existingCards)) {
+			for (MerchantsCardEntity card : existingCards) {
+				if (card.getChannelCardId() != null) {
+					existingByChannelCardId.put(card.getChannelCardId(), card);
+				}
+			}
+		}
+
+		List<Integer> toAddIds = new ArrayList<>();
+		for (Integer channelCardId : incomingSet) {
+			MerchantsCardEntity existing = existingByChannelCardId.get(channelCardId);
+			if (existing == null) {
+				toAddIds.add(channelCardId);
 				continue;
 			}
-			MerchantsCardEntity merchantsCardEntity = new MerchantsCardEntity();
-			BeanUtils.copyProperties(channelCardEntity, merchantsCardEntity);
-			merchantsCardEntity.setId(null);
-			merchantsCardEntity.setMchName(merchantsInfoEntity.getMerchantsNamme());
-			merchantsCardEntity.setChannelCardId(channelCardEntity.getId());
-			merchantsCardEntity.setMchId(merchantsInfoEntity.getId());
-			merchantsCardEntity.setMchAppid(merchantsInfoEntity.getAppId());
-			merchantsCardEntity.setChannelId(channelInfoEntity.getId());
-			merchantsCardEntity.setChannelCode(channelInfoEntity.getChannelCode());
-			GenericityUtil.setDate(merchantsCardEntity);
-			merchantsCardDao.insert(merchantsCardEntity);
+			if (MerchantsCardStateEnums.DISABLE.getIndex().equals(existing.getCardState())) {
+				MerchantsCardEntity restoreEntity = new MerchantsCardEntity();
+				restoreEntity.setId(existing.getId());
+				restoreEntity.setCardState(MerchantsCardStateEnums.NORMAL.getIndex());
+				merchantsCardDao.updateById(restoreEntity);
+			}
 		}
-		return setResultSuccess();
+		if (!toAddIds.isEmpty()) {
+			addMerchantsCard(toAddIds, merchantsInfoEntity, channelInfoEntity);
+		}
+
+		if (CollectionUtils.isEmpty(existingCards)) {
+			return;
+		}
+		for (MerchantsCardEntity existing : existingCards) {
+			Integer channelCardId = existing.getChannelCardId();
+			if (channelCardId == null || incomingSet.contains(channelCardId)) {
+				continue;
+			}
+			if (!MerchantsCardStateEnums.NORMAL.getIndex().equals(existing.getCardState())) {
+				continue;
+			}
+			UpdateWrapper<MerchantsCardEntity> updateWrapper = new UpdateWrapper<>();
+			updateWrapper.eq("id", existing.getId())
+					.set("card_state", MerchantsCardStateEnums.DISABLE.getIndex());
+			merchantsCardDao.update(null, updateWrapper);
+		}
+	}
+
+	/**
+	 * 批量新增商户产品（优化了逐条查询和插入的性能问题）
+	 */
+	public void addMerchantsCard(List<Integer> channelCardsId,
+	                             MerchantsInfoEntity merchantsInfoEntity,
+	                             ChannelInfoEntity channelInfoEntity) throws InvocationTargetException, IllegalAccessException {
+		// 1. 批量查询上游卡并校验
+		List<ChannelCardEntity> channelCardList = channelCardDao.selectBatchIds(channelCardsId);
+		if (channelCardList.size() != channelCardsId.size()) {
+			throw new RuntimeException("部分上游卡不存在，请确认卡片信息");
+		}
+
+		// 2. 校验上游卡归属 & 过滤已存在的卡片
+		for (ChannelCardEntity card : channelCardList) {
+			if (!channelInfoEntity.getId().equals(card.getChannelId())) {
+				throw new RuntimeException("上游卡与指定上游不匹配，cardId：" + card.getId());
+			}
+
+			MerchantsCardEntity entity = new MerchantsCardEntity();
+			BeanUtils.copyProperties(card, entity);
+			entity.setId(null);
+			entity.setMchName(merchantsInfoEntity.getMerchantsNamme());
+			entity.setChannelCardId(card.getId());
+			entity.setMchId(merchantsInfoEntity.getId());
+			entity.setMchAppid(merchantsInfoEntity.getAppId());
+			entity.setChannelId(channelInfoEntity.getId());
+			entity.setChannelCode(channelInfoEntity.getChannelCode());
+			entity.setCardState(MerchantsCardStateEnums.NORMAL.getIndex());
+			GenericityUtil.setDate(entity);
+			merchantsCardDao.insert(entity);
+		}
 	}
 
 	@Override
@@ -321,7 +386,8 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
 		entity.setAmount(merchantsFinanceQuery.getMerchantsAmount());
 		entity.setTxStatus(TxStatusEnums.WAIT.getIndex().toString());
 		entity.setRecordType(RecordTypeEnums.MANUAL.getIndex().toString());
-		entity.setOperator(merchantsFinanceQuery.getOperator());
+		entity.setOperator(tokenUtils.getUsername());
+		entity.setRemark(merchantsFinanceQuery.getRemark());
 		GenericityUtil.setDate(entity);
 		financeRechargeRecordDao.insert(entity);
 		return setResultSuccess();

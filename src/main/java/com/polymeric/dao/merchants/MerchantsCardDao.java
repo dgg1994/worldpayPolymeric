@@ -16,7 +16,17 @@ public interface MerchantsCardDao extends BaseMapper<MerchantsCardEntity>{
 	@Select("select * from merchants_card where mch_id = #{mchId} and card_state = #{cardState}")
 	List<PoloMerchantBankcardRes> findMchId(@Param("mchId") Integer mchId,@Param("cardState") Integer cardState);
 
-	@Select("select mc.*,mi.merchants_namme as mchName from merchants_card mc left join merchants_info mi on mi.id = mc.mch_id where mc.mch_id = #{id}")
+	@Select("select " +
+			"mc.*," +
+			"cc.apply_fee as channelApplyFee," +
+			"cc.recharge_fee as channelRechargeFee," +
+			"cc.active_min_limit as channelActiveMinLimit," +
+			"cc.recharge_min_limit as channelRechargeMinLimit, " +
+			"mi.merchants_namme AS mchName " +
+			"from merchants_card mc " +
+			"left join channel_card cc on mc.card_id = cc.card_id " +
+			"left join merchants_info mi on mi.id = mc.mch_id " +
+			"where mc.mch_id = #{id} and mc.card_state = 1")
     List<MerchantsCardEntity> selectListAll(@Param("id") Integer id);
 
 	@Select("<script>" +
@@ -46,4 +56,7 @@ public interface MerchantsCardDao extends BaseMapper<MerchantsCardEntity>{
 			"left join merchants_info mi on mi.id = mc.mch_id " +
 			"where mc.id = #{id}")
 	MerchantsCardEntity selectInfoById(@Param("id") Integer id);
+
+	@Select("select channel_card_id from merchants_card where mch_id = #{id}")
+	List<Integer> selectListById(@Param("id") Integer id);
 }

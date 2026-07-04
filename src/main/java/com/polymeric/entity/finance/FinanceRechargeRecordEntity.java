@@ -49,6 +49,10 @@ public class FinanceRechargeRecordEntity extends PageQueryHelperEntity {
     @ApiModelProperty(name = "recordType", value = "记录类型：自动链上/人工处理", required = true, dataType = "String")
     private String recordType;
 
+    @TableField("remark")
+    @ApiModelProperty(name = "remark", value = "备注", required = true, dataType = "String")
+    private String remark;
+
     @TableField("operator")
     @ApiModelProperty(name = "operator", value = "操作人", dataType = "String")
     private String operator;
