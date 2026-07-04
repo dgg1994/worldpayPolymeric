@@ -1,21 +1,17 @@
 package com.polymeric.service.admin.impl;
 
-import java.util.List;
-
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.polymeric.aop.SysLogAnnotation;
 import com.polymeric.base.BaseApiService;
 import com.polymeric.base.ResponseBase;
 import com.polymeric.entity.system.DicEntity;
-import com.polymeric.enums.DeviceTypeEnums;
-import com.polymeric.enums.LanguageEnums;
-import com.polymeric.enums.OrderStatusEnum;
-import com.polymeric.enums.UserStateEnums;
+import com.polymeric.enums.*;
 import com.polymeric.service.admin.DicService;
 import com.polymeric.utils.I18nUtil;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @Transactional
@@ -49,7 +45,17 @@ public class DicServiceImpl extends BaseApiService implements DicService{
 		return setResultSuccess(list, I18nUtil.getMessage("base_success"));
 	}
 
+	@Override
+	public ResponseBase findOrderTradeType() {
+		List<DicEntity> list = OrderTradeTypeEnum.getList();
+		return setResultSuccess(list, I18nUtil.getMessage("base_success"));
+	}
 
+	@Override
+	public ResponseBase findTradeType() {
+		List<DicEntity> list = TradeTypeEnum.getList();
+		return setResultSuccess(list, I18nUtil.getMessage("base_success"));
+	}
 
 
 }
