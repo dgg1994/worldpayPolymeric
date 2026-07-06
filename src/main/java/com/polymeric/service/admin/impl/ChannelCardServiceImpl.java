@@ -5,6 +5,7 @@ import java.util.List;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.polymeric.dao.merchants.MerchantsCardDao;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,9 @@ public class ChannelCardServiceImpl extends BaseApiService implements ChannelCar
 	
 	@Autowired
 	private ChannelCardDao channelCardDao;
+
+	@Autowired
+	private MerchantsCardDao merchantsCardDao;
 
 	@Override
 	public ResponseBase pull(Integer id) {
@@ -132,6 +136,8 @@ public class ChannelCardServiceImpl extends BaseApiService implements ChannelCar
 		}
 		channelCardEntity.setCardState(cardStatus);
 		channelCardDao.updateById(channelCardEntity);
+		//同时更新商户的商品状态
+		merchantsCardDao.updateByCardId(channelCardEntity.getCardId(), cardStatus);
 		return setResultSuccess();
 	}
 

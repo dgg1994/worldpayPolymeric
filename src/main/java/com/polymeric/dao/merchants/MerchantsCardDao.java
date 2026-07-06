@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -59,4 +60,8 @@ public interface MerchantsCardDao extends BaseMapper<MerchantsCardEntity>{
 
 	@Select("select channel_card_id from merchants_card where mch_id = #{id}")
 	List<Integer> selectListById(@Param("id") Integer id);
+
+	@Update("update merchants_card set card_state = #{cardStatus} where card_id = #{cardId}")
+	void updateByCardId(@Param("cardId") Integer cardId, @Param("cardStatus") Integer cardStatus);
+
 }

@@ -2,6 +2,7 @@ package com.polymeric.dao.merchants;
 
 import java.util.List;
 
+import com.polymeric.query.admin.StatQuery;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
@@ -47,4 +48,17 @@ public interface MerchantsInfoDao extends BaseMapper<MerchantsInfoEntity>{
 			+ "</script>")
 	MerchantsInfoEntity findSum(MerchantsInfoEntity entity);
 
+	@Select("<script>" +
+			"select sum(available_amount) as availableAmount, sum(freeze_amount) as freezeAmount " +
+			"from merchants_info " +
+			"<where>" +
+			"<if test='statQuery.startTime != null and statQuery.startTime != \"\"'>" +
+			"    and setTime &gt;= #{statQuery.startTime} " +
+			"</if>" +
+			"<if test='statQuery.endTime != null and statQuery.endTime != \"\"'>" +
+			"    and setTime &lt;= #{statQuery.endTime} " +
+			"</if>" +
+			"</where>" +
+			"</script>")
+    MerchantsInfoEntity selectAmount(@Param("statQuery") StatQuery statQuery);
 }
