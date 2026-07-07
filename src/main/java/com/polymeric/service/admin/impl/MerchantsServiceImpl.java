@@ -18,6 +18,7 @@ import com.polymeric.dao.system.SysRoleDao;
 import com.polymeric.dao.system.SysUserDao;
 import com.polymeric.entity.channel.ChannelCardEntity;
 import com.polymeric.entity.channel.ChannelInfoEntity;
+import com.polymeric.entity.finance.FinanceRechargeRecordEntity;
 import com.polymeric.entity.merchants.MerchantsCardEntity;
 import com.polymeric.entity.merchants.MerchantsInfoEntity;
 import com.polymeric.entity.merchants.MerchantsIpEntity;
@@ -385,15 +386,7 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
 		if (merchantsInfoEntity == null){
 			return setResultError("商户不存在，当前交易无效");
 		}
-		//新增充值记录
-		buildOrderMchCashFlow(merchantsInfoEntity,merchantsFinanceQuery);
-		//更新商户余额
-		BigDecimal availableAmount = merchantsInfoEntity.getAvailableAmount() == null ? BigDecimal.ZERO : merchantsInfoEntity.getAvailableAmount();
-		BigDecimal newAmount = availableAmount.add(merchantsFinanceQuery.getMerchantsAmount());
-		merchantsInfoEntity.setAvailableAmount(newAmount);
-		merchantsInfoEntity.setGmtModified(new Date());
-		merchantsInfoDao.updateById(merchantsInfoEntity);
-		/*FinanceRechargeRecordEntity entity = new FinanceRechargeRecordEntity();
+		FinanceRechargeRecordEntity entity = new FinanceRechargeRecordEntity();
 		entity.setMerchantId(String.valueOf(merchantsFinanceQuery.getMchId()));
 		entity.setFinanceAddress(merchantsFinanceQuery.getMerchantsAddress());
 		entity.setAmount(merchantsFinanceQuery.getMerchantsAmount());
@@ -402,28 +395,10 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
 		entity.setOperator(tokenUtils.getUsername());
 		entity.setRemark(merchantsFinanceQuery.getRemark());
 		GenericityUtil.setDate(entity);
-		financeRechargeRecordDao.insert(entity);*/
+		financeRechargeRecordDao.insert(entity);
 		return setResultSuccess();
 	}
 
-	void buildOrderMchCashFlow(MerchantsInfoEntity merchantsInfoEntity,MerchantsFinanceQuery merchantsFinanceQuery) throws InvocationTargetException, IllegalAccessException {
-		OrderMchCashFlowEntity entity = new OrderMchCashFlowEntity();
-		entity.setOrderNum(OrderCodeFactory.getOrderCode(merchantsInfoEntity.getId().longValue()));
-		entity.setMchOrderNum(OrderCodeFactory.getOrderCode(merchantsInfoEntity.getId().longValue()));
-		entity.setMchId(merchantsInfoEntity.getId());
-		entity.setMchAppid(merchantsInfoEntity.getAppId());
-		entity.setUserId(merchantsInfoEntity.getSysAccountId());
-		entity.setUserUid(null);
-		entity.setUserBankcardId(null);
-		entity.setTradeType(OrderTradeTypeEnum.INCOME.getIndex());
-		entity.setOrderType(OrderTypeEnum.BALANCE_TOP_UP.getCode());
-		entity.setActualAmount(merchantsFinanceQuery.getMerchantsAmount());
-		entity.setBeforeAmount(merchantsInfoEntity.getAvailableAmount());
-		entity.setAfterAmount(merchantsInfoEntity.getAvailableAmount().add(merchantsFinanceQuery.getMerchantsAmount()));
-		entity.setOrderState(OrderStatusEnum.SUCCESS.getCode());
-		GenericityUtil.setDate(entity);
-		orderMchCashFlowDao.insert(entity);
-	}
 
 
 }

@@ -1,5 +1,6 @@
 package com.polymeric.service.admin.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -8,17 +9,31 @@ import com.polymeric.constants.Constants;
 import com.polymeric.dao.finance.FinanceAddressDao;
 import com.polymeric.dao.finance.FinanceRechargeRecordDao;
 import com.polymeric.dao.merchants.MerchantsInfoDao;
+import com.polymeric.dao.merchants.MerchantsWebHookMsgDao;
+import com.polymeric.dao.order.OrderMchCashFlowDao;
 import com.polymeric.entity.finance.FinanceAddressEntity;
 import com.polymeric.entity.finance.FinanceRechargeRecordEntity;
 import com.polymeric.entity.merchants.MerchantsInfoEntity;
+import com.polymeric.entity.merchants.MerchantsUserEntity;
+import com.polymeric.entity.merchants.MerchantsWebHookMsgEntity;
+import com.polymeric.entity.order.OrderMchCashFlowEntity;
+import com.polymeric.enums.OrderStatusEnum;
+import com.polymeric.enums.OrderTypeEnum;
 import com.polymeric.enums.TxStatusEnums;
 import com.polymeric.enums.UniversalEnums;
 import com.polymeric.enums.UserStateEnums;
+import com.polymeric.enums.WebHookStateEnum;
+import com.polymeric.enums.WebhookPoloTypeEnums;
+import com.polymeric.query.webhook.WebhookQuery;
 import com.polymeric.service.admin.FinanceService;
+import com.polymeric.service.api.impl.ApiMchWebhook;
 import com.polymeric.utils.GenericityUtil;
+import com.polymeric.utils.OrderCodeFactory;
 import com.polymeric.utils.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.parser.Token;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +44,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import static com.polymeric.base.BaseApiService.setResultError;
 import static com.polymeric.base.BaseApiService.setResultSuccess;
@@ -53,6 +69,12 @@ public class FinanceServiceImpl implements FinanceService {
 
     @Resource
     private MerchantsInfoDao merchantsInfoDao;
+    
+    @Autowired
+    private OrderMchCashFlowDao orderMchCashFlowDao;
+    
+    @Autowired
+    private MerchantsWebHookMsgDao merchantsWebHookMsgDao;
 
     @Resource
     private TokenUtils tokenUtils;
@@ -121,11 +143,26 @@ public class FinanceServiceImpl implements FinanceService {
             if (merchantsInfoEntity == null){
                 return setResultError("商户信息不存在，审核失败");
             }
+            //修改商户余额
+            BigDecimal beforeAmount = merchantsInfoEntity.getAvailableAmount();
             BigDecimal availableAmount = merchantsInfoEntity.getAvailableAmount() == null ? BigDecimal.ZERO : merchantsInfoEntity.getAvailableAmount();
             BigDecimal newAmount = availableAmount.add(financeRechargeRecordEntity.getAmount());
             merchantsInfoEntity.setAvailableAmount(newAmount);
             merchantsInfoEntity.setGmtModified(new Date());
             merchantsInfoDao.updateById(merchantsInfoEntity);
+            //新增商户资金明细记录
+            OrderMchCashFlowEntity mchCashFlowEntity = this.addTradeList(beforeAmount,merchantsInfoEntity,financeRechargeRecordEntity);
+            // 构建商户回调消息
+            WebhookQuery entity = new WebhookQuery();
+            entity.setEventId(UUID.randomUUID().toString().replace("-", ""));
+            entity.setEventType(WebhookPoloTypeEnums.MERCHANT_RECHARGE.getCode());
+            entity.setAmount(financeRechargeRecordEntity.getAmount().toString());
+            entity.setTxTime(System.currentTimeMillis());
+            entity.setCurreny(Constants.USD);
+            entity.setTxHash(mchCashFlowEntity.getOrderNum());
+    		MerchantsWebHookMsgEntity msgEntity = this.buildMsg(WebhookPoloTypeEnums.MERCHANT_RECHARGE.getIndex(),merchantsInfoEntity, entity);
+    		// 回调给商户
+    		ApiMchWebhook.callbackMerchants(msgEntity);
         }
 
         //变更充值记录状态
@@ -134,4 +171,59 @@ public class FinanceServiceImpl implements FinanceService {
         financeRechargeRecordDao.updateById(financeRechargeRecordEntity);
         return setResultSuccess();
     }
+    
+    /**
+     * @category 新增商户资金流水
+     * @param beforeAmount
+     * @param merchantsInfoEntity
+     * @param financeRechargeRecordEntity
+     */
+    public OrderMchCashFlowEntity addTradeList(BigDecimal beforeAmount, MerchantsInfoEntity merchantsInfoEntity, FinanceRechargeRecordEntity financeRechargeRecordEntity) {
+    	try {
+    		String orderNum = "WP"+OrderCodeFactory.getOrderCode(null);
+    		OrderMchCashFlowEntity merchantsOrderEntity = new OrderMchCashFlowEntity();
+    		merchantsOrderEntity.setOrderNum(orderNum);
+    		merchantsOrderEntity.setMchOrderNum(orderNum);
+    		merchantsOrderEntity.setMchId(merchantsInfoEntity.getId());
+    		merchantsOrderEntity.setMchAppid(merchantsInfoEntity.getAppId());
+    		merchantsOrderEntity.setTradeType(OrderTypeEnum.BALANCE_TOP_UP.getLable());
+    		merchantsOrderEntity.setOrderType(OrderTypeEnum.BALANCE_TOP_UP.getCode());
+    		merchantsOrderEntity.setOrderAmount(financeRechargeRecordEntity.getAmount());
+    		merchantsOrderEntity.setActualAmount(financeRechargeRecordEntity.getAmount());
+    		merchantsOrderEntity.setBeforeAmount(beforeAmount);
+    		merchantsOrderEntity.setAfterAmount(merchantsInfoEntity.getAvailableAmount());
+    		merchantsOrderEntity.setOrderState(OrderStatusEnum.SUCCESS.getCode());
+    		GenericityUtil.setDate(merchantsOrderEntity);
+    		orderMchCashFlowDao.insert(merchantsOrderEntity);
+    		return merchantsOrderEntity;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
+    }
+    
+    public <T> MerchantsWebHookMsgEntity buildMsg(Integer msgType,MerchantsInfoEntity infoEntity,T requestBody) {
+		try {
+			MerchantsWebHookMsgEntity msgEntity = new MerchantsWebHookMsgEntity();
+			msgEntity.setMsgCode(OrderCodeFactory.getMsgCode(null));
+			msgEntity.setMchAppid(infoEntity.getAppId());
+//			msgEntity.setUid(userEntity.getApiUid());
+			msgEntity.setMsgType(msgType);
+			msgEntity.setMsgTypeName(WebhookPoloTypeEnums.getName(msgType));
+			MerchantsInfoEntity merchantsInfoEntity = merchantsInfoDao.findByAppId(infoEntity.getAppId());
+			if(merchantsInfoEntity != null) {
+				msgEntity.setCallbackUrl(merchantsInfoEntity.getWebhookUrl());			
+			}
+			msgEntity.setCallbackData(JSON.toJSONString(requestBody));
+			msgEntity.setStatus(WebHookStateEnum.PENDING.getCode());
+			msgEntity.setRetryCount(Constants.ZERO_INT);
+			GenericityUtil.setDate(msgEntity);
+			merchantsWebHookMsgDao.insert(msgEntity);
+			return msgEntity;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
+	}
+    
 }

@@ -130,4 +130,18 @@ public class WebhookQuery {
         @ApiModelProperty(value = "交易ID")
         private String transactionId;
     }
+    
+    // ========== 新增：商户充值通知字段 ==========
+    @ApiModelProperty(name = "amount", value = "充值金额", required = true, dataType = "String")
+    private String amount;
+    
+    @ApiModelProperty(name = "curreny", value = "充值币种", required = true, dataType = "String")
+    private String curreny;
+    
+    @ApiModelProperty(name = "txTime", value = "交易时间", required = true, dataType = "String")
+    private Long txTime;
+    
+    @ApiModelProperty(name = "txHash", value = "交易hash", required = true, dataType = "String")
+    private String txHash;
+    
 }
