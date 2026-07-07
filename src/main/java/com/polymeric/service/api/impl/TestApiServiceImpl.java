@@ -1,24 +1,111 @@
 package com.polymeric.service.api.impl;
 
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.util.Random;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Strings;
+import com.polymeric.base.BaseApiService;
+import com.polymeric.base.ResponseBase;
+import com.polymeric.constants.Constants;
+import com.polymeric.dao.merchants.MerchantsKeyDao;
+import com.polymeric.entity.merchants.MerchantsKeyEntity;
+import com.polymeric.query.api.TestQuery;
 import com.polymeric.query.webhook.WebhookQuery;
 import com.polymeric.response.pub.ApiResponseEntity;
 import com.polymeric.service.api.TestApiService;
+import com.polymeric.utils.sign.RsaSignUtil;
+
+import cn.hutool.http.HttpRequest;
 
 @RestController
 @Transactional
 @CrossOrigin
-public class TestApiServiceImpl implements TestApiService{
+public class TestApiServiceImpl extends BaseApiService implements TestApiService{
+	
+	@Autowired
+	private MerchantsKeyDao merchantsKeyDao;
 
 	@Override
 	public ApiResponseEntity webHookTest(@RequestBody WebhookQuery query) {
 		System.out.println("商户收到回调："+JSON.toJSONString(query));
 		return ApiResponseEntity.success();
 	}
+
+	@Override
+	public ResponseBase send(@RequestBody TestQuery query) {
+		try {
+			MerchantsKeyEntity keyEntity = merchantsKeyDao.findAppId(query.getAppid());
+			if(keyEntity == null) {
+				return setResultError("商户不存在");
+			}
+			ResponseBase base = this.postData(query,keyEntity);
+			return base;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
+	}
+	
+	
+	
+	
+	public ResponseBase postData(TestQuery query, MerchantsKeyEntity keyEntity) {
+        try {
+            String nonce = generateNonce();
+            String timestamp = String.valueOf(System.currentTimeMillis());
+            String sign = RsaSignUtil.signRequest(query.getAppid(),nonce,timestamp,JSON.toJSONString(query), keyEntity.getPrivateKey());
+            // 3. 构建HTTP请求
+            HttpRequest httpRequest = HttpRequest.post(query.getUrl())
+                    .header("appId", query.getAppid())
+                    .header("nonce", nonce)
+                    .header("timestamp", timestamp)
+                    .header("sign", sign);
+            if (!Strings.isNullOrEmpty(query.getUid())) {
+	           	 httpRequest.header("uId", query.getUid());
+	           }
+            // 4. 发送请求
+            String dataStr = httpRequest
+                    .timeout(30000)
+                    .body(JSON.toJSONString(query))
+                    .charset(StandardCharsets.UTF_8)
+                    .setConnectionTimeout(5000)
+                    .execute()
+                    .body();
+            // 5. 解析响应
+            System.out.println(dataStr);
+            ApiResponseEntity responseEntity =
+                    JSONObject.parseObject(dataStr, ApiResponseEntity.class);
+            if (Constants.ZERO_INT == responseEntity.getCode()) {
+                return setResultSuccess(responseEntity.getData(), responseEntity.getMsg());
+            } else {
+                return setResult(responseEntity.getCode(),
+                        responseEntity.getMsg(), null);
+            }
+
+        } catch (Exception e) {
+            return setResult(Constants.HTTP_RES_CODE_500,
+                    "系统异常：" + e.getMessage(), null);
+        }
+    }
+	
+    private static String generateNonce() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder sb = new StringBuilder();
+        Random random = new SecureRandom();
+        for (int i = 0; i < 32; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return sb.toString();
+    }
+	
 
 }
