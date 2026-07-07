@@ -38,6 +38,12 @@ public class StatInfoRes {
     @ApiModelProperty(name = "apiRequestCount", value = "API访问次数", required = true, dataType = "Long")
     private Long apiRequestCount;
 
+    @ApiModelProperty(name = "apiRequestCount", value = "出账金额", required = true, dataType = "Long")
+    private Long chargeAmount;
+
+    @ApiModelProperty(name = "apiRequestCount", value = "入账金额", required = true, dataType = "Long")
+    private Long recordAmount;
+
 
 
 }

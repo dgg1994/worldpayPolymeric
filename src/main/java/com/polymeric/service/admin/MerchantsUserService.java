@@ -4,6 +4,7 @@ import com.polymeric.base.ResponseBase;
 import com.polymeric.entity.merchants.MerchantsUserEntity;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -20,4 +21,8 @@ public interface MerchantsUserService {
     @PostMapping("/findList")
     @ApiOperation(value = "商户用户列表", notes = "商户用户列表", response = ResponseBase.class)
     ResponseBase findList(MerchantsUserEntity entity);
+
+    @GetMapping("/findById")
+    @ApiOperation(value = "根据商户id查询商户用户", notes = "根据商户id查询商户用户", response = ResponseBase.class)
+    ResponseBase findById(Integer id);
 }

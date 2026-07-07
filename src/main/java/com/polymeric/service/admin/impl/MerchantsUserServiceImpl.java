@@ -6,7 +6,9 @@ import com.github.pagehelper.PageInfo;
 import com.polymeric.base.ResponseBase;
 import com.polymeric.constants.Constants;
 import com.polymeric.dao.merchants.MerchantsUserDao;
+import com.polymeric.dao.merchants.MerchantsUserKycDao;
 import com.polymeric.entity.merchants.MerchantsUserEntity;
+import com.polymeric.entity.merchants.MerchantsUserKycEntity;
 import com.polymeric.service.admin.MerchantsUserService;
 import com.polymeric.utils.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,9 @@ public class MerchantsUserServiceImpl implements MerchantsUserService {
     private MerchantsUserDao merchantsUserDao;
 
     @Resource
+    private MerchantsUserKycDao merchantsUserKycDao;
+
+    @Resource
     private TokenUtils tokenUtils;
 
     @Override
@@ -61,5 +66,22 @@ public class MerchantsUserServiceImpl implements MerchantsUserService {
         List<MerchantsUserEntity> list = merchantsUserDao.selectList(wrapper);
         PageInfo<MerchantsUserEntity> info = new PageInfo<>(list);
         return setResultSuccess(info, Constants.SUCCESS);
+    }
+
+    @Override
+    public ResponseBase findById(Integer id) {
+        MerchantsUserEntity merchantsUserEntity = merchantsUserDao.selectById(id);
+        if (merchantsUserEntity != null) {
+            QueryWrapper<MerchantsUserKycEntity> wrapper = new QueryWrapper<>();
+            wrapper.eq("user_id",merchantsUserEntity.getId());
+            wrapper.eq("user_uid",merchantsUserEntity.getApiUid());
+            MerchantsUserKycEntity merchantsUserKycEntity = merchantsUserKycDao.selectOne(wrapper);
+            if (merchantsUserKycEntity != null){
+                merchantsUserEntity.setMerchantsUserKycEntity(merchantsUserKycEntity);
+            }
+        }else {
+            merchantsUserEntity = new MerchantsUserEntity();
+        }
+        return setResultSuccess(merchantsUserEntity);
     }
 }

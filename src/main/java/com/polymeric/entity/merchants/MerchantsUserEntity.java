@@ -60,4 +60,8 @@ public class MerchantsUserEntity extends PageQueryHelperEntity{
 	@TableField("gmtModified")
 	@ApiModelProperty(name = "gmtModified",value = "更新时间",required = false,dataType = "Date")
 	private Date gmtModified;
+
+	@TableField(exist = false)
+	@ApiModelProperty(name = "kyc信息",value = "kyc信息",required = false,dataType = "Date")
+	private MerchantsUserKycEntity merchantsUserKycEntity;
 }

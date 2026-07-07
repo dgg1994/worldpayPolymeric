@@ -35,6 +35,10 @@ public interface DicService {
 	@GetMapping("/findTradeType")
 	@ApiOperation(value = "查询商户交易类型",notes = "查询商户交易类型",response = ResponseBase.class)
 	ResponseBase findTradeType();
+
+	@GetMapping("/findOrderType")
+	@ApiOperation(value = "查询订单交易类型",notes = "查询订单交易类型",response = ResponseBase.class)
+	ResponseBase findOrderType();
 	
 
 }

@@ -1,6 +1,11 @@
 package com.polymeric.enums;
 
 
+import com.polymeric.entity.system.DicEntity;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 订单类型
  * 
@@ -37,5 +42,26 @@ public enum OrderTypeEnum {
 	public Integer getLable() {
 		return lable;
 	}
-    
+
+    public static String getName(int i) {
+        OrderTypeEnum[] orderTradeTypeEnums = values();
+        for (OrderTypeEnum orderTradeTypeEnum : orderTradeTypeEnums) {
+            if (orderTradeTypeEnum.getCode().equals(i)) {
+                return orderTradeTypeEnum.getName();
+            }
+        }
+        return null;
+    }
+
+    public static List<DicEntity> getList() {
+        OrderTypeEnum[] typeEnums = values();
+        List<DicEntity> list = new ArrayList<>();
+        for (OrderTypeEnum typeEnum : typeEnums) {
+            DicEntity dicEntity = new DicEntity();
+            dicEntity.setId(typeEnum.getCode());
+            dicEntity.setName(typeEnum.getName());
+            list.add(dicEntity);
+        }
+        return list;
+    }
 }

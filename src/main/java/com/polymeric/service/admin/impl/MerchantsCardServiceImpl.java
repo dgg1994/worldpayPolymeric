@@ -11,6 +11,7 @@ import com.polymeric.entity.channel.ChannelCardEntity;
 import com.polymeric.entity.channel.ChannelInfoEntity;
 import com.polymeric.entity.merchants.MerchantsCardEntity;
 import com.polymeric.service.admin.MerchantsCardService;
+import com.polymeric.utils.GenericityUtil;
 import com.polymeric.utils.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,12 +59,13 @@ public class MerchantsCardServiceImpl implements MerchantsCardService {
 
     @Override
     public ResponseBase findList(@RequestBody MerchantsCardEntity entity) {
-        PageHelper.startPage(entity.getPageNumber(), entity.getPageSize());
         if (!tokenUtils.isAdmin()){
             entity.setMchId(tokenUtils.getMerchantId());
         }
         List<MerchantsCardEntity> list = merchantsCardDao.selectCardList(entity);
-        PageInfo<MerchantsCardEntity> info = new PageInfo<>(list);
+        List<MerchantsCardEntity> pageList = GenericityUtil.Page(list, entity.getPageNumber(), entity.getPageSize());
+        PageInfo<MerchantsCardEntity> info = new PageInfo<>(pageList);
+        info.setTotal(list.size());
         return setResultSuccess(info, Constants.SUCCESS);
     }
 

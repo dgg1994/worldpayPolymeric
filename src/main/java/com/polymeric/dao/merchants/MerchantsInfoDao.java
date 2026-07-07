@@ -52,12 +52,6 @@ public interface MerchantsInfoDao extends BaseMapper<MerchantsInfoEntity>{
 			"select sum(available_amount) as availableAmount, sum(freeze_amount) as freezeAmount " +
 			"from merchants_info " +
 			"<where>" +
-			"<if test='statQuery.startTime != null and statQuery.startTime != \"\"'>" +
-			"    and setTime &gt;= #{statQuery.startTime} " +
-			"</if>" +
-			"<if test='statQuery.endTime != null and statQuery.endTime != \"\"'>" +
-			"    and setTime &lt;= #{statQuery.endTime} " +
-			"</if>" +
 			"<if test='statQuery.merchantAppId != null and statQuery.merchantAppId != \"\"'>" +
 			"    and app_id = #{statQuery.merchantAppId} " +
 			"</if>" +

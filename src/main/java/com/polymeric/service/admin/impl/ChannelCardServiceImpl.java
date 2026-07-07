@@ -92,24 +92,7 @@ public class ChannelCardServiceImpl extends BaseApiService implements ChannelCar
 	@Override
 	public ResponseBase findList(@RequestBody ChannelCardEntity entity) {
 		PageHelper.startPage(entity.getPageNumber(), entity.getPageSize());
-		QueryWrapper<ChannelCardEntity> wrapper = new QueryWrapper<>();
-		Integer channelId = entity.getChannelId();
-		if (channelId != null) {
-			wrapper.eq("channel_id", channelId);
-		}
-		String cardTitle = entity.getCardTitle();
-		if (StringUtils.isNoneBlank(cardTitle)) {
-			wrapper.eq("card_title", cardTitle);
-		}
-		String bankCardNature = entity.getBankCardNature();
-		if (StringUtils.isNoneBlank(bankCardNature)) {
-			wrapper.eq("bank_card_nature", bankCardNature);
-		}
-		Integer cardState = entity.getCardState();
-		if (cardState != null){
-			wrapper.eq("card_state",cardState);
-		}
-		List<ChannelCardEntity> list = channelCardDao.selectList(wrapper);
+		List<ChannelCardEntity> list = channelCardDao.selectAll(entity);
 		PageInfo<ChannelCardEntity> info = new PageInfo<>(list);
 		return setResultSuccess(info, Constants.SUCCESS);
 	}
