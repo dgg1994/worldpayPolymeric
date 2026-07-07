@@ -144,7 +144,7 @@ public class FinanceServiceImpl implements FinanceService {
                 return setResultError("商户信息不存在，审核失败");
             }
             //修改商户余额
-            BigDecimal beforeAmount = merchantsInfoEntity.getAvailableAmount();
+            BigDecimal beforeAmount = merchantsInfoEntity.getAvailableAmount() == null ? BigDecimal.ZERO : merchantsInfoEntity.getAvailableAmount();
             BigDecimal availableAmount = merchantsInfoEntity.getAvailableAmount() == null ? BigDecimal.ZERO : merchantsInfoEntity.getAvailableAmount();
             BigDecimal newAmount = availableAmount.add(financeRechargeRecordEntity.getAmount());
             merchantsInfoEntity.setAvailableAmount(newAmount);
