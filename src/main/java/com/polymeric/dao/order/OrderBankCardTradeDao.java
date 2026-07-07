@@ -26,4 +26,10 @@ public interface OrderBankCardTradeDao extends BaseMapper<OrderBankCardTradeEnti
 	@Select("select * from order_bankcard_trade_list where id = #{id}")
 	BankCardInfoRes findById(@Param("id") Integer id);
 
+	@Select("select * from order_bankcard_trade_list where user_bankcard_id = #{userBankcardId} and trade_type = #{tradeType} and order_state = #{orderState}")
+	OrderBankCardTradeEntity findOpenCardList(@Param("userBankcardId") Integer userBankcardId,@Param("tradeType") Integer tradeType,@Param("orderState") Integer orderState);
+
+	@Select("select * from order_bankcard_trade_list where order_num = #{orderNum}")
+	OrderBankCardTradeEntity findOrderNum(@Param("orderNum") String orderNum);
+
 }

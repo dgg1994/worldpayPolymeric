@@ -20,6 +20,9 @@ public class OrderCodeFactory {
 	private static final String REFUND_ORDER = "3";
 	/** 未付款重新支付别头 */
 	private static final String AGAIN_ORDER = "4";
+	
+	private static final String MSG_ORDER = "MG";
+	
 	/** 随即编码 */
 	private static final int[] r = new int[] { 7, 9, 6, 2, 8, 1, 3, 0, 5, 4 };
 	/** 用户id和随机数总长度 */
@@ -114,6 +117,10 @@ public class OrderCodeFactory {
 	 */
 	public static String getAgainCode(Long userId) {
 		return AGAIN_ORDER + getCode(userId);
+	}
+	
+	public static String getMsgCode(Long userId) {
+		return MSG_ORDER + getCode(userId);
 	}
 
 	public static String NoRepeatSixCode() {

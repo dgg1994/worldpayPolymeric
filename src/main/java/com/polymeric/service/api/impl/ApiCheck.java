@@ -70,7 +70,7 @@ public class ApiCheck extends BaseApiService {
 	}
 	
 	@Autowired
-	public void setMerchantsUserDao(MerchantsCardDao merchantsCardDao) {
+	public void setMerchantsCardDao(MerchantsCardDao merchantsCardDao) {
 		ApiCheck.merchantsCardDao = merchantsCardDao;
 	}
 

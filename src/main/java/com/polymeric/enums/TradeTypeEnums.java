@@ -12,7 +12,7 @@ public enum TradeTypeEnums {
     FEE(172, "卡片手续费","Card processing fees"),
     ATM_WITHDRAW(173, "卡片ATM取现","Card ATM cash withdrawal"),
     PRE_AUTHORIZATION(174, "卡预授权","Card pre-authorization"),
-    CANCEL_CARD(175, "卡片注销","");
+    CANCEL_CARD(175, "卡片注销","Card cancellation");
     
     private Integer code;
     private String desc;

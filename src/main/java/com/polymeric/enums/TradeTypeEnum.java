@@ -61,7 +61,7 @@ public enum TradeTypeEnum {
     public static String getName(int i) {
         TradeTypeEnum[] tradeTypeEnums = values();
         for (TradeTypeEnum tradeTypeEnum : tradeTypeEnums) {
-            if (tradeTypeEnum.getCode().equals(i)) {
+            if (tradeTypeEnum.getIndex().equals(i)) {
                 return tradeTypeEnum.getName();
             }
         }

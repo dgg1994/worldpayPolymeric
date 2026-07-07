@@ -14,12 +14,14 @@ public class CallbackHttpSendUtil extends ApiResponseEntity{
 
 	public static final int NOTIFY_CONNECT_TIMEOUT = 1000;
 
-	public static ApiResponseEntity forwardData(String url, String pram) {
+	public static ApiResponseEntity forwardData( String sign,String url, String pram) {
 	    try {
-	        System.out.println("回调商户地址：" + url);
-	        System.out.println("回调商户内容：" + pram);
-	        
+	    	log.info("回调商户地址：{}", url);
+	    	log.info("回调商户内容：{}", pram);
 	        HttpRequest httpRequest = HttpRequest.post(url);
+	        if (sign != null && !sign.trim().isEmpty()) {
+	            httpRequest.header("sign", sign);
+	        }
 	        String dataStr = httpRequest
 	                .timeout(NOTIFY_TIMEOUT)
 	                .body(pram)
@@ -28,9 +30,7 @@ public class CallbackHttpSendUtil extends ApiResponseEntity{
 	                .setConnectionTimeout(NOTIFY_CONNECT_TIMEOUT)
 	                .execute()
 	                .body();
-	        
 	        log.info("响应原始数据: {}", dataStr);
-	        
 	        if (dataStr != null && !dataStr.isEmpty()) {
 	            String trimData = dataStr.trim();
 	            // ✅ 判断响应格式

@@ -108,14 +108,14 @@ public class MerchantsWebHookMsgServiceImpl extends BaseApiService implements Me
 		}
 		JSONObject jsonObject = JSONObject.parseObject(msgEntity.getCallbackData());
 		//回调参数添加sign
+		String sign = null;
 		MerchantsKeyEntity keyEntity = merchantsKeyDao.findAppId(msgEntity.getMchAppid());
 		if(keyEntity != null && keyEntity.getPrivateKey() != null && !keyEntity.getPrivateKey().isEmpty()) {
-			String sign = RsaSignUtil.signRequest(null,null,null,msgEntity.getCallbackData(), keyEntity.getPrivateKey());
-			jsonObject.put("sign", sign);
+			sign = RsaSignUtil.signRequest(null,null,null,msgEntity.getCallbackData(), keyEntity.getPrivateKey());
 		}
 		//回调商户
 		boolean callbackState = false;
-		ApiResponseEntity responseEntity = CallbackHttpSendUtil.forwardData(msgEntity.getCallbackUrl(), JSON.toJSONString(jsonObject));
+		ApiResponseEntity responseEntity = CallbackHttpSendUtil.forwardData(sign,msgEntity.getCallbackUrl(), JSON.toJSONString(jsonObject));
 		if(Constants.HTTP_RES_CODE_200.equals(responseEntity.getCode())) {//响应成功
 			msgEntity.setStatus(WebHookStateEnum.SUCCESS.getCode());
 			callbackState = true;

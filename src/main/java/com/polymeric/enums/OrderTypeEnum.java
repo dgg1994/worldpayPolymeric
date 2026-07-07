@@ -11,7 +11,8 @@ public enum OrderTypeEnum {
 
     OPEN_CARD(1, "开卡",2),
     CARD_TOP_UP(2, "银行卡充值",2),
-    BALANCE_TOP_UP(3, "余额充值",1);
+    BALANCE_TOP_UP(3, "余额充值",1),
+    CANCEL_CARD(4, "注销卡片",1);
 
     private final Integer code;
     

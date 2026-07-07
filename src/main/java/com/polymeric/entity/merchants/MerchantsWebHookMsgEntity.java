@@ -30,14 +30,18 @@ public class MerchantsWebHookMsgEntity extends PageQueryHelperEntity {
 	@TableField("mch_appid")
 	@ApiModelProperty(name = "mchAppid", value = "商户appid", required = true, dataType = "String")
 	private String mchAppid;
-
-	@TableField("sys_orderno")
-	@ApiModelProperty(name = "sysOrderNo", value = "平台订单号", required = true, dataType = "String")
-	private String sysOrderNo;
-
-	@TableField("merchant_order_no")
-	@ApiModelProperty(name = "merchantOrderNo", value = "商户订单号", dataType = "String")
-	private String merchantOrderNo;
+	
+	@TableField("uid")
+	@ApiModelProperty(name = "uid", value = "用户uid", required = true, dataType = "String")
+	private String uid;
+	
+	@TableField("msg_type")
+	@ApiModelProperty(name = "msgType", value = "消息类型", required = true, dataType = "String")
+	private Integer msgType;
+	
+	@TableField("msg_type_name")
+	@ApiModelProperty(name = "msgTypeName", value = "消息类型", required = true, dataType = "String")
+	private String msgTypeName;
 
 	@TableField("callback_url")
 	@ApiModelProperty(name = "callbackUrl", value = "回调地址", required = true, dataType = "String")
