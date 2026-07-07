@@ -1,7 +1,6 @@
 package com.polymeric.service.admin;
 
 import com.polymeric.base.ResponseBase;
-import com.polymeric.entity.channel.ChannelCardEntity;
 import com.polymeric.query.admin.StatQuery;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

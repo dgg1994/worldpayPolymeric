@@ -58,6 +58,9 @@ public interface MerchantsInfoDao extends BaseMapper<MerchantsInfoEntity>{
 			"<if test='statQuery.endTime != null and statQuery.endTime != \"\"'>" +
 			"    and setTime &lt;= #{statQuery.endTime} " +
 			"</if>" +
+			"<if test='statQuery.merchantAppId != null and statQuery.merchantAppId != \"\"'>" +
+			"    and app_id = #{statQuery.merchantAppId} " +
+			"</if>" +
 			"</where>" +
 			"</script>")
     MerchantsInfoEntity selectAmount(@Param("statQuery") StatQuery statQuery);

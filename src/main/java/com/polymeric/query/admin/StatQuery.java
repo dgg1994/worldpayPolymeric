@@ -12,4 +12,6 @@ import lombok.Data;
 @Data
 public class StatQuery extends PageQueryHelperEntity {
 
+    private String merchantAppId;
+
 }
