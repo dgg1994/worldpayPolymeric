@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.polymeric.dao.merchants.MerchantsCardDao;
+import com.polymeric.enums.CardStateEnums;
+import com.polymeric.enums.UserStateEnums;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +97,26 @@ public class ChannelCardServiceImpl extends BaseApiService implements ChannelCar
 		List<ChannelCardEntity> list = channelCardDao.selectAll(entity);
 		PageInfo<ChannelCardEntity> info = new PageInfo<>(list);
 		return setResultSuccess(info, Constants.SUCCESS);
+	}
+
+	@Override
+	public ResponseBase add(@RequestBody ChannelCardEntity entity) {
+		try {
+			//根据上游编码 和产品id进行查询
+			ChannelCardEntity channelCardEntity = channelCardDao.selectOne(new QueryWrapper<ChannelCardEntity>().eq("channel_code", entity.getChannelCode()).eq("card_id", entity.getCardId()));
+			if (channelCardEntity != null){
+				return setResultError("该上游产品已存在");
+			}
+			ChannelInfoEntity channelInfoEntity = channelInfoDao.selectById(entity.getChannelId());
+			entity.setChannelCode(channelInfoEntity.getChannelCode());
+			entity.setChannelName(channelInfoEntity.getChannelName());
+			entity.setCardState(UserStateEnums.NORMAL.getIndex());
+			GenericityUtil.setDate(entity);
+			channelCardDao.insert(entity);
+			return setResultSuccess();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
