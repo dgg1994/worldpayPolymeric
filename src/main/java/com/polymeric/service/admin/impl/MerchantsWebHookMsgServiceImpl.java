@@ -26,6 +26,7 @@ import com.polymeric.entity.merchants.MerchantsWebHookMsgEntity;
 import com.polymeric.enums.WebHookStateEnum;
 import com.polymeric.response.pub.ApiResponseEntity;
 import com.polymeric.service.admin.MerchantsWebHookMsgService;
+import com.polymeric.service.api.impl.ApiMchWebhook;
 import com.polymeric.utils.CallbackHttpSendUtil;
 import com.polymeric.utils.sign.RsaSignUtil;
 
@@ -82,7 +83,7 @@ public class MerchantsWebHookMsgServiceImpl extends BaseApiService implements Me
 		try {
 			MerchantsWebHookMsgEntity entity = merchantsWebHookMsgDao.selectById(id);
 			if(entity != null) {
-				boolean temp = this.callbackMerchants(entity);
+				boolean temp = ApiMchWebhook.callbackMerchants(entity);
 				if(temp) {
 					return setResultSuccess();
 				}
@@ -95,46 +96,6 @@ public class MerchantsWebHookMsgServiceImpl extends BaseApiService implements Me
 		}
 	}
 	
-	
-	/**
-	 * @category 回调商户
-	 * @param msgEntity
-	 * @return
-	 */
-	@Synchronized
-	public boolean callbackMerchants(MerchantsWebHookMsgEntity msgEntity) {
-		if(msgEntity.getCallbackData() == null || msgEntity.getCallbackData().isEmpty()) {
-			return false;
-		}
-		JSONObject jsonObject = JSONObject.parseObject(msgEntity.getCallbackData());
-		//回调参数添加sign
-		String sign = null;
-		MerchantsKeyEntity keyEntity = merchantsKeyDao.findAppId(msgEntity.getMchAppid());
-		if(keyEntity != null && keyEntity.getPrivateKey() != null && !keyEntity.getPrivateKey().isEmpty()) {
-			sign = RsaSignUtil.signRequest(null,null,null,msgEntity.getCallbackData(), keyEntity.getPrivateKey());
-		}
-		//回调商户
-		boolean callbackState = false;
-		ApiResponseEntity responseEntity = CallbackHttpSendUtil.forwardData(sign,msgEntity.getCallbackUrl(), JSON.toJSONString(jsonObject));
-		if(Constants.HTTP_RES_CODE_200.equals(responseEntity.getCode())) {//响应成功
-			msgEntity.setStatus(WebHookStateEnum.SUCCESS.getCode());
-			callbackState = true;
-		}else {
-			int retryCount = msgEntity.getRetryCount();
-			if (retryCount < RETRY_INTERVALS.length) {
-			    int interval = RETRY_INTERVALS[retryCount];
-			    Date nextTime = new Date(System.currentTimeMillis() + interval * 1000L);
-			    msgEntity.setNextRetryTime(nextTime);
-			}
-			msgEntity.setStatus(WebHookStateEnum.FAILED.getCode());
-		}
-		//修改回调消息状态及通知次数
-		msgEntity.setRetryCount(msgEntity.getRetryCount() +1);
-		msgEntity.setGmtModified(new Date());
-		merchantsWebHookMsgDao.updateById(msgEntity);
-		return callbackState;
-	
-	}
-	
+
 
 }

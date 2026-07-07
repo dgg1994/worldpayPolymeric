@@ -12,7 +12,9 @@ public enum WebhookPoloTypeEnums {
 	CARD_STATUS_CHANGE(3, "cardStatusChange", "银行卡状态变更通知"),
 	CARD_RECHARGE_RESULT(4, "cardRechargeResult", "充值结果通知"),
 	TRANSACTION_CREATED(5, "transactionCreated", "银行卡交易通知"),
-	MERCHANT_RECHARGE(6, "merchantRecharge", "商户充值通知");
+	MERCHANT_RECHARGE(6, "merchantRecharge", "商户充值通知"),
+	MERCHANT_TRADEFEE(7, "merchantTradeFee", "商户交易费通知"),
+	CARD_UPDATE(8, "cardUpdate", "卡变更通知");
     
     private Integer index;
     private String code;

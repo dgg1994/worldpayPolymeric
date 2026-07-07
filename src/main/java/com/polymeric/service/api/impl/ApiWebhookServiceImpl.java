@@ -91,6 +91,12 @@ public class ApiWebhookServiceImpl implements ApiWebhookService {
 				return this.cardRechargeResult(entity);
 			}else if(entity != null && WebhookPoloTypeEnums.TRANSACTION_CREATED.getCode().equals(entity.getEventType())) {//银行卡交易通知
 				return this.transactionCreated(entity);
+			}else if(entity != null && WebhookPoloTypeEnums.MERCHANT_RECHARGE.getCode().equals(entity.getEventType())) {//商户充值通知
+				return ApiResponseEntity.success();
+			}else if(entity != null && WebhookPoloTypeEnums.MERCHANT_TRADEFEE.getCode().equals(entity.getEventType())) {//商户交易费通知
+				return ApiResponseEntity.success();
+			}else if(entity != null && WebhookPoloTypeEnums.CARD_UPDATE.getCode().equals(entity.getEventType())) {//卡变更通知
+				return ApiResponseEntity.success();
 			}else {
 				return ApiResponseEntity.error();
 			}
