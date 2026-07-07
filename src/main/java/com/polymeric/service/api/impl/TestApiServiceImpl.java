@@ -60,6 +60,7 @@ public class TestApiServiceImpl extends BaseApiService implements TestApiService
 	
 	public ResponseBase postData(TestQuery query, MerchantsKeyEntity keyEntity) {
         try {
+        	System.out.println("商户测试请求接口："+query.getUrl());
             String nonce = generateNonce();
             String timestamp = String.valueOf(System.currentTimeMillis());
             String sign = RsaSignUtil.signRequest(query.getAppid(),nonce,timestamp,JSON.toJSONString(query), keyEntity.getPrivateKey());
@@ -75,22 +76,15 @@ public class TestApiServiceImpl extends BaseApiService implements TestApiService
             // 4. 发送请求
             String dataStr = httpRequest
                     .timeout(30000)
-                    .body(JSON.toJSONString(query))
+                    .body(JSON.toJSONString(query.getData()))
                     .charset(StandardCharsets.UTF_8)
                     .setConnectionTimeout(5000)
                     .execute()
                     .body();
             // 5. 解析响应
-            System.out.println(dataStr);
-            ApiResponseEntity responseEntity =
-                    JSONObject.parseObject(dataStr, ApiResponseEntity.class);
-            if (Constants.ZERO_INT == responseEntity.getCode()) {
-                return setResultSuccess(responseEntity.getData(), responseEntity.getMsg());
-            } else {
-                return setResult(responseEntity.getCode(),
-                        responseEntity.getMsg(), null);
-            }
-
+            ResponseBase base = JSONObject.parseObject(dataStr, ResponseBase.class);
+            return base;
+			
         } catch (Exception e) {
             return setResult(Constants.HTTP_RES_CODE_500,
                     "系统异常：" + e.getMessage(), null);
