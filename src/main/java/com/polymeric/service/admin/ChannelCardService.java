@@ -23,6 +23,10 @@ public interface ChannelCardService {
 	@ApiOperation(value = "上游产品展示", notes = "上游产品展示", response = ResponseBase.class)
 	ResponseBase findList(ChannelCardEntity entity);
 
+	@PostMapping("/add")
+	@ApiOperation(value = "新增上游产品", notes = "新增上游产品", response = ResponseBase.class)
+	ResponseBase add(ChannelCardEntity entity);
+
 	@PostMapping("/update")
 	@ApiOperation(value = "编辑上游产品", notes = "编辑上游产品", response = ResponseBase.class)
 	ResponseBase update(ChannelCardEntity entity);
