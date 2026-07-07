@@ -99,30 +99,38 @@ public class ChannelCardServiceImpl extends BaseApiService implements ChannelCar
 
 	@Override
 	public ResponseBase update(@RequestBody ChannelCardEntity entity) {
-		Integer id = entity.getId();
-		if (id == null){
-			return setResultError("未传入产品id");
-		}
-		ChannelCardEntity channelCardEntity = channelCardDao.selectById(id);
-		if (channelCardEntity == null){
-			return setResultError("产品信息错误");
-		}
-		channelCardDao.updateById(entity);
-		return setResultSuccess();
-	}
+        try {
+            Integer id = entity.getId();
+            if (id == null){
+                return setResultError("未传入产品id");
+            }
+            ChannelCardEntity channelCardEntity = channelCardDao.selectById(id);
+            if (channelCardEntity == null){
+                return setResultError("产品信息错误");
+            }
+            channelCardDao.updateById(entity);
+            return setResultSuccess();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 	@Override
 	public ResponseBase updateState(Integer id, Integer cardStatus) {
-		ChannelCardEntity channelCardEntity = channelCardDao.selectById(id);
-		if (channelCardEntity == null){
-			return setResultError("产品信息错误");
-		}
-		channelCardEntity.setCardState(cardStatus);
-		channelCardDao.updateById(channelCardEntity);
-		//同时更新商户的商品状态
-		merchantsCardDao.updateByCardId(channelCardEntity.getCardId(), cardStatus);
-		return setResultSuccess();
-	}
+        try {
+            ChannelCardEntity channelCardEntity = channelCardDao.selectById(id);
+            if (channelCardEntity == null){
+                return setResultError("产品信息错误");
+            }
+            channelCardEntity.setCardState(cardStatus);
+            channelCardDao.updateById(channelCardEntity);
+            //同时更新商户的商品状态
+            merchantsCardDao.updateByCardId(channelCardEntity.getCardId(), cardStatus);
+            return setResultSuccess();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 	@Override
 	public ResponseBase findById(Integer id) {

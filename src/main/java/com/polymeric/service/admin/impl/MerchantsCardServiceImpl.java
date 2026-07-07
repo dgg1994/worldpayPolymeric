@@ -80,20 +80,24 @@ public class MerchantsCardServiceImpl implements MerchantsCardService {
 
     @Override
     public ResponseBase updateState(Integer id, Integer merchantsStatus) {
-        MerchantsCardEntity merchantsCardEntity = merchantsCardDao.selectById(id);
-        if (merchantsCardEntity == null){
-            return setResultError("商户商品不存在，请确认信息");
-        }
-        if (merchantsStatus == 1 && merchantsCardEntity.getCardState() == 2){
-            //说明要上架查询上游卡状态
-            ChannelCardEntity channelCardEntity = channelCardDao.selectOne(new QueryWrapper<ChannelCardEntity>().eq("card_id", merchantsCardEntity.getCardId()));
-            if (channelCardEntity != null && channelCardEntity.getCardState() == 2){
-                return setResultError("上游卡已下架，请确认信息");
+        try {
+            MerchantsCardEntity merchantsCardEntity = merchantsCardDao.selectById(id);
+            if (merchantsCardEntity == null){
+                return setResultError("商户商品不存在，请确认信息");
             }
+            if (merchantsStatus == 1 && merchantsCardEntity.getCardState() == 2){
+                //说明要上架查询上游卡状态
+                ChannelCardEntity channelCardEntity = channelCardDao.selectOne(new QueryWrapper<ChannelCardEntity>().eq("card_id", merchantsCardEntity.getCardId()));
+                if (channelCardEntity != null && channelCardEntity.getCardState() == 2){
+                    return setResultError("上游卡已下架，请确认信息");
+                }
+            }
+            merchantsCardEntity.setCardState(merchantsStatus);
+            merchantsCardDao.updateById(merchantsCardEntity);
+            return setResultSuccess();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        merchantsCardEntity.setCardState(merchantsStatus);
-        merchantsCardDao.updateById(merchantsCardEntity);
-        return setResultSuccess();
 
     }
 }

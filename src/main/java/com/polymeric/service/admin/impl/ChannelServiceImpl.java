@@ -44,35 +44,45 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     public ResponseBase add(@RequestBody ChannelInfoEntity entity) throws InvocationTargetException, IllegalAccessException {
-        // 不能重复添加
-        QueryWrapper<ChannelInfoEntity> wrapper = new QueryWrapper<>();
-        wrapper.eq("channel_code",entity.getChannelCode());
-        wrapper.eq("app_Id",entity.getAppId());
-        ChannelInfoEntity channelInfoEntity = channelInfoDao.selectOne(wrapper);
-        if (channelInfoEntity != null){
-            return setResultError("上游已存在，切勿重复添加");
+        try {
+            // 不能重复添加
+            QueryWrapper<ChannelInfoEntity> wrapper = new QueryWrapper<>();
+            wrapper.eq("channel_code",entity.getChannelCode());
+            wrapper.eq("app_Id",entity.getAppId());
+            ChannelInfoEntity channelInfoEntity = channelInfoDao.selectOne(wrapper);
+            if (channelInfoEntity != null){
+                return setResultError("上游已存在，切勿重复添加");
+            }
+            entity.setChannelState(1);
+            GenericityUtil.setDate(entity);
+            channelInfoDao.insert(entity);
+            //拉去上游产品
+            cardServiceImpl.pull(entity.getId());
+            return setResultSuccess();
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
         }
-        entity.setChannelState(1);
-        GenericityUtil.setDate(entity);
-        channelInfoDao.insert(entity);
-        //拉去上游产品
-        cardServiceImpl.pull(entity.getId());
-        return setResultSuccess();
     }
 
     @Override
     public ResponseBase update(@RequestBody ChannelInfoEntity entity) {
-        Integer id = entity.getId();
-        if (id == null){
-            return setResultError("上游id不能为空");
+        try {
+            Integer id = entity.getId();
+            if (id == null){
+                return setResultError("上游id不能为空");
+            }
+            ChannelInfoEntity channelInfoEntity = channelInfoDao.selectById(id);
+            if (channelInfoEntity == null){
+                return setResultError("上游信息不存在，请确认信息是否正确");
+            }
+            entity.setGmtModified(new Date());
+            channelInfoDao.updateById(entity);
+            return setResultSuccess();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        ChannelInfoEntity channelInfoEntity = channelInfoDao.selectById(id);
-        if (channelInfoEntity == null){
-            return setResultError("上游信息不存在，请确认信息是否正确");
-        }
-        entity.setGmtModified(new Date());
-        channelInfoDao.updateById(entity);
-        return setResultSuccess();
     }
 
     @Override
@@ -99,14 +109,18 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     public ResponseBase updateState(Integer id, Integer channelStatus) {
-        ChannelInfoEntity channelInfoEntity = channelInfoDao.selectById(id);
-        if (channelInfoEntity == null){
-            return setResultError("上游信息不存在，请确认信息是否正确");
+        try {
+            ChannelInfoEntity channelInfoEntity = channelInfoDao.selectById(id);
+            if (channelInfoEntity == null){
+                return setResultError("上游信息不存在，请确认信息是否正确");
+            }
+            channelInfoEntity.setChannelState(channelStatus);
+            channelInfoEntity.setGmtModified(new Date());
+            channelInfoDao.updateById(channelInfoEntity);
+            return setResultSuccess();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        channelInfoEntity.setChannelState(channelStatus);
-        channelInfoEntity.setGmtModified(new Date());
-        channelInfoDao.updateById(channelInfoEntity);
-        return setResultSuccess();
     }
 
     @Override
