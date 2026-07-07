@@ -11,6 +11,7 @@ import com.polymeric.service.admin.ChannelCardService;
 import com.polymeric.service.admin.ChannelService;
 import com.polymeric.utils.GenericityUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,8 +39,8 @@ public class ChannelServiceImpl implements ChannelService {
     @Resource
     private ChannelInfoDao channelInfoDao;
 
-    @Resource
-    private ChannelCardService channelCardService;
+    @Autowired
+    private ChannelCardServiceImpl cardServiceImpl;
 
     @Override
     public ResponseBase add(@RequestBody ChannelInfoEntity entity) throws InvocationTargetException, IllegalAccessException {
@@ -55,8 +56,7 @@ public class ChannelServiceImpl implements ChannelService {
         GenericityUtil.setDate(entity);
         channelInfoDao.insert(entity);
         //拉去上游产品
-        Integer id = channelInfoDao.selectByAppIdAndChannelCode(entity.getChannelCode(),entity.getAppId());
-        channelCardService.pull(id);
+        cardServiceImpl.pull(entity.getId());
         return setResultSuccess();
     }
 
