@@ -7,9 +7,11 @@ import com.polymeric.base.ResponseBase;
 import com.polymeric.constants.Constants;
 import com.polymeric.dao.merchants.MerchantsUserDao;
 import com.polymeric.dao.merchants.MerchantsUserKycDao;
+import com.polymeric.entity.merchants.MerchantsCardEntity;
 import com.polymeric.entity.merchants.MerchantsUserEntity;
 import com.polymeric.entity.merchants.MerchantsUserKycEntity;
 import com.polymeric.service.admin.MerchantsUserService;
+import com.polymeric.utils.GenericityUtil;
 import com.polymeric.utils.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -46,25 +48,13 @@ public class MerchantsUserServiceImpl implements MerchantsUserService {
 
     @Override
     public ResponseBase findList(@RequestBody  MerchantsUserEntity entity) {
-        PageHelper.startPage(entity.getPageNumber(), entity.getPageSize());
-        QueryWrapper<MerchantsUserEntity> wrapper = new QueryWrapper<>();
-        String userEmail = entity.getUserEmail();
-        if (StringUtils.isNoneBlank(userEmail)){
-            wrapper.eq("user_email",userEmail);
-        }
-        Integer channelId = entity.getChannelId();
-        if (channelId != null){
-            wrapper.eq("channel_id",channelId);
-        }
-        Integer mchId = entity.getMchId();
-        if (mchId != null){
-            wrapper.eq("mch_id",mchId);
-        }
         if (!tokenUtils.isAdmin()) {
-            wrapper.eq("mch_id",tokenUtils.getMerchantId());
+            entity.setMchId(tokenUtils.getMerchantId());
         }
-        List<MerchantsUserEntity> list = merchantsUserDao.selectList(wrapper);
-        PageInfo<MerchantsUserEntity> info = new PageInfo<>(list);
+        List<MerchantsUserEntity> list = merchantsUserDao.selectAll(entity);
+        List<MerchantsUserEntity> pageList = GenericityUtil.Page(list, entity.getPageNumber(), entity.getPageSize());
+        PageInfo<MerchantsUserEntity> info = new PageInfo<>(pageList);
+        info.setTotal(list.size());
         return setResultSuccess(info, Constants.SUCCESS);
     }
 

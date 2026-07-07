@@ -31,7 +31,14 @@ public class DicServiceImpl extends BaseApiService implements DicService{
 		List<DicEntity> list = UserStateEnums.getList();
 		return setResultSuccess(list, I18nUtil.getMessage("base_success"));
 	}
-	
+
+	@Override
+	@SysLogAnnotation(module = "字典管理", type = "get", remark = "查询用户KYC状态")
+	public ResponseBase findKycState() {
+		List<DicEntity> list = KycStateEnums.getList();
+		return setResultSuccess(list, I18nUtil.getMessage("base_success"));
+	}
+
 	@Override
 	@SysLogAnnotation(module = "字典管理", type = "get", remark = "查询设备类型")
 	public ResponseBase findDeviceType() {
@@ -40,24 +47,28 @@ public class DicServiceImpl extends BaseApiService implements DicService{
 	}
 
 	@Override
+	@SysLogAnnotation(module = "字典管理", type = "get", remark = "查询订单状态")
 	public ResponseBase findOrderState() {
 		List<DicEntity> list = OrderStatusEnum.getList();
 		return setResultSuccess(list, I18nUtil.getMessage("base_success"));
 	}
 
 	@Override
+	@SysLogAnnotation(module = "字典管理", type = "get", remark = "查询订单类型")
 	public ResponseBase findOrderTradeType() {
 		List<DicEntity> list = OrderTradeTypeEnum.getList();
 		return setResultSuccess(list, I18nUtil.getMessage("base_success"));
 	}
 
 	@Override
+	@SysLogAnnotation(module = "字典管理", type = "get", remark = "查询交易类型")
 	public ResponseBase findTradeType() {
 		List<DicEntity> list = TradeTypeEnum.getList();
 		return setResultSuccess(list, I18nUtil.getMessage("base_success"));
 	}
 
 	@Override
+	@SysLogAnnotation(module = "字典管理", type = "get", remark = "查询订单类型")
 	public ResponseBase findOrderType() {
 		List<DicEntity> list = OrderTypeEnum.getList();
 		return setResultSuccess(list, I18nUtil.getMessage("base_success"));

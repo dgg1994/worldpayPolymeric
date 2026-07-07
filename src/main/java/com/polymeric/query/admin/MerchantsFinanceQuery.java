@@ -21,9 +21,13 @@ public class MerchantsFinanceQuery {
     @ApiModelProperty(name = "mchId",value = "商户id",required = false,dataType = "mchId")
     private Integer mchId;
 
-	@NotBlank(message = "商户充值地址不能为欸空")
+	@NotBlank(message = "商户充值地址不能为空")
     @ApiModelProperty(name = "merchantsAddress",value = "商户充值信息",required = false,dataType = "merchantsAddress")
     private String merchantsAddress;
+
+    @NotBlank(message = "商户充值地址类型不能为空")
+    @ApiModelProperty(name = "addressType",value = "商户充值地址类型信息",required = false,dataType = "merchantsAddress")
+    private String addressType;
 
 	@NotNull(message = "充值金额不能为空")
     @ApiModelProperty(name = "merchantsAmount",value = "商户充值金额",required = false,dataType = "merchantsAmount")

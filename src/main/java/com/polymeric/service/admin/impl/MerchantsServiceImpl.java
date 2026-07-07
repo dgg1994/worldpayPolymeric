@@ -8,22 +8,22 @@ import com.polymeric.base.ResponseBase;
 import com.polymeric.constants.Constants;
 import com.polymeric.dao.channel.ChannelCardDao;
 import com.polymeric.dao.channel.ChannelInfoDao;
+import com.polymeric.dao.finance.FinanceAddressDao;
 import com.polymeric.dao.finance.FinanceRechargeRecordDao;
 import com.polymeric.dao.merchants.MerchantsCardDao;
 import com.polymeric.dao.merchants.MerchantsInfoDao;
 import com.polymeric.dao.merchants.MerchantsIpDao;
 import com.polymeric.dao.merchants.MerchantsKeyDao;
-import com.polymeric.dao.order.OrderMchCashFlowDao;
 import com.polymeric.dao.system.SysRoleDao;
 import com.polymeric.dao.system.SysUserDao;
 import com.polymeric.entity.channel.ChannelCardEntity;
 import com.polymeric.entity.channel.ChannelInfoEntity;
+import com.polymeric.entity.finance.FinanceAddressEntity;
 import com.polymeric.entity.finance.FinanceRechargeRecordEntity;
 import com.polymeric.entity.merchants.MerchantsCardEntity;
 import com.polymeric.entity.merchants.MerchantsInfoEntity;
 import com.polymeric.entity.merchants.MerchantsIpEntity;
 import com.polymeric.entity.merchants.MerchantsKeyEntity;
-import com.polymeric.entity.order.OrderMchCashFlowEntity;
 import com.polymeric.entity.system.SysRoleEntity;
 import com.polymeric.entity.system.SysUserEntity;
 import com.polymeric.enums.*;
@@ -32,7 +32,6 @@ import com.polymeric.response.sign.KeyPairResult;
 import com.polymeric.service.admin.MerchantsService;
 import com.polymeric.utils.GenericityUtil;
 import com.polymeric.utils.GoogleAuthenticatorUtil;
-import com.polymeric.utils.OrderCodeFactory;
 import com.polymeric.utils.TokenUtils;
 import com.polymeric.utils.sign.KeyPairUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +47,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.InvocationTargetException;
-import java.math.BigDecimal;
 import java.util.*;
 
 
@@ -80,7 +78,7 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
 	private FinanceRechargeRecordDao financeRechargeRecordDao;
 
 	@Autowired
-	private OrderMchCashFlowDao orderMchCashFlowDao;
+	private FinanceAddressDao financeAddressDao; ;
 	
 	@Autowired
 	SysUserDao sysUserDao;
@@ -393,7 +391,17 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
             if (merchantsInfoEntity == null){
                 return setResultError("商户不存在，当前交易无效");
             }
-            FinanceRechargeRecordEntity entity = new FinanceRechargeRecordEntity();
+			FinanceAddressEntity financeAddressEntity = financeAddressDao.selectOne(
+					new QueryWrapper<FinanceAddressEntity>()
+							.eq("address", merchantsFinanceQuery.getMerchantsAddress())
+							.eq("address_type",merchantsFinanceQuery.getAddressType()));
+			if (financeAddressEntity == null){
+				return setResultError("商户充值地址不存在，当前交易无效");
+			}
+			if (financeAddressEntity.getMinAmount().compareTo(merchantsFinanceQuery.getMerchantsAmount()) > 0){
+				return setResultError("商户充值金额低于最小充值金额，当前交易无效");
+			}
+			FinanceRechargeRecordEntity entity = new FinanceRechargeRecordEntity();
             entity.setMerchantId(String.valueOf(merchantsFinanceQuery.getMchId()));
             entity.setFinanceAddress(merchantsFinanceQuery.getMerchantsAddress());
             entity.setAmount(merchantsFinanceQuery.getMerchantsAmount());

@@ -1,6 +1,10 @@
 package com.polymeric.enums;
 
 
+import com.polymeric.entity.system.DicEntity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @category kyc认证状态
@@ -43,4 +47,25 @@ public enum KycStateEnums {
 	    this.name = name;
 	}
 
+	public static String getName(int i) {
+		KycStateEnums[] kycStateEnums = values();
+		for (KycStateEnums ky : kycStateEnums) {
+			if (ky.getIndex().equals(i)) {
+				return ky.getName();
+			}
+		}
+		return null;
+	}
+
+	public static List<DicEntity> getList() {
+		KycStateEnums[] typeEnums = values();
+		List<DicEntity> list = new ArrayList<>();
+		for (KycStateEnums typeEnum : typeEnums) {
+			DicEntity dicEntity = new DicEntity();
+			dicEntity.setId(typeEnum.getIndex());
+			dicEntity.setName(typeEnum.getName());
+			list.add(dicEntity);
+		}
+		return list;
+	}
 }

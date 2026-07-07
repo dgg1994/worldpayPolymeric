@@ -19,6 +19,10 @@ public interface DicService {
 	@GetMapping("/findUserState")
 	@ApiOperation(value = "查询用户状态",notes = "查询用户状态",response = ResponseBase.class)
 	ResponseBase findUserState();
+
+	@GetMapping("/findKycState")
+	@ApiOperation(value = "查询用户KYC状态",notes = "查询用户KYC状态",response = ResponseBase.class)
+	ResponseBase findKycState();
 	
 	@GetMapping("/findDeviceType")
 	@ApiOperation(value = "查询设备类型",notes = "查询设备类型",response = ResponseBase.class)

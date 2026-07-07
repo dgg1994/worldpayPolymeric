@@ -62,6 +62,14 @@ public class MerchantsUserEntity extends PageQueryHelperEntity{
 	private Date gmtModified;
 
 	@TableField(exist = false)
+	@ApiModelProperty(name = "merchantsName",value = "商户名称",required = true,dataType = "String")
+	private String merchantsName;
+
+	@TableField(exist = false)
+	@ApiModelProperty(name = "channelName",value = "渠道名称",required = true,dataType = "String")
+	private String channelName;
+
+	@TableField(exist = false)
 	@ApiModelProperty(name = "kyc信息",value = "kyc信息",required = false,dataType = "Date")
 	private MerchantsUserKycEntity merchantsUserKycEntity;
 }

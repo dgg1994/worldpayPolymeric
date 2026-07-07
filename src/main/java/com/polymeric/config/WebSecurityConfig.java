@@ -73,6 +73,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		        .authorizeRequests()
                 //druid放行
 		        .antMatchers("/statistics/**").permitAll()
+		        .antMatchers("/**").permitAll()
                 .antMatchers("/druid/**").permitAll()
                 .antMatchers("/actuator/**").permitAll()
                 //swagger放行
