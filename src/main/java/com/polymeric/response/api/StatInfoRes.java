@@ -70,13 +70,6 @@ public class StatInfoRes {
     private Long bankCardActiveCount;
 
     // ========== API相关 ==========
-    @ApiModelProperty(name = "apiRequestCount", value = "API访问次数", required = true, dataType = "Long")
-    private Long apiRequestCount;
-
-    @ApiModelProperty(name = "apiDeleteCount", value = "删除API请求次数", required = true, dataType = "Long")
-    private Long apiDeleteCount;
-
-
     @ApiModelProperty(name = "callBackCount", value = "回调消息总数", required = true, dataType = "Long")
     private Long callBackCount;
 

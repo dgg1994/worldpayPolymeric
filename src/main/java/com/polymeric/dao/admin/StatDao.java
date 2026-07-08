@@ -108,20 +108,6 @@ public interface StatDao {
     Long countBankCardActive(@Param("statQuery") StatQuery statQuery);
 
     @Select("<script>" +
-            "SELECT COUNT(1) FROM order_bankcard_trade_list WHERE 1 = 1" +
-            "<if test='statQuery.merchantAppId != null and statQuery.merchantAppId != \"\"'> AND mch_appid = #{statQuery.merchantAppId} </if>" +
-            "<if test='statQuery.startTime != null and statQuery.endTime != null'> AND setTime BETWEEN #{statQuery.startTime} AND #{statQuery.endTime} </if>" +
-            "</script>")
-    Long countApiRequest(@Param("statQuery") StatQuery statQuery);
-
-    @Select("<script>" +
-            "SELECT COUNT(1) FROM order_bankcard_trade_list WHERE trade_type = 175" +
-            "<if test='statQuery.merchantAppId != null and statQuery.merchantAppId != \"\"'> AND mch_appid = #{statQuery.merchantAppId} </if>" +
-            "<if test='statQuery.startTime != null and statQuery.endTime != null'> AND setTime BETWEEN #{statQuery.startTime} AND #{statQuery.endTime} </if>" +
-            "</script>")
-    Long countApiDelete(@Param("statQuery") StatQuery statQuery);
-
-    @Select("<script>" +
             "SELECT COUNT(1) FROM merchants_webhook_msg WHERE 1 = 1" +
             "<if test='statQuery.merchantAppId != null and statQuery.merchantAppId != \"\"'> AND mch_appid = #{statQuery.merchantAppId} </if>" +
             "<if test='statQuery.startTime != null and statQuery.endTime != null'> AND setTime BETWEEN #{statQuery.startTime} AND #{statQuery.endTime} </if>" +

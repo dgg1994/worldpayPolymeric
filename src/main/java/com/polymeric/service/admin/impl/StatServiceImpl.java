@@ -70,8 +70,6 @@ public class StatServiceImpl implements StatService {
         infoRes.setUserRegisterTotal(defaultLong(statDao.countUserRegister(statQuery)));
         infoRes.setBankCardOpenCount(defaultLong(statDao.countBankCardOpen(statQuery)));
         infoRes.setBankCardActiveCount(defaultLong(statDao.countBankCardActive(statQuery)));
-        infoRes.setApiRequestCount(defaultLong(statDao.countApiRequest(statQuery)));
-        infoRes.setApiDeleteCount(defaultLong(statDao.countApiDelete(statQuery)));
         infoRes.setCallBackCount(defaultLong(statDao.countCallBack(statQuery)));
 
         return setResultSuccess(infoRes);
