@@ -53,6 +53,10 @@ public class MerchantsUserEntity extends PageQueryHelperEntity{
 	@ApiModelProperty(name = "kycState",value = "kyc认证状态",required = true,dataType = "String")
     private Integer kycState;
 	
+	@TableField("failed_reason")
+	@ApiModelProperty(name = "failedReason",value = "kyc审核失败原因",required = true,dataType = "String")
+    private String failedReason;
+	
 	@TableField("setTime")
 	@ApiModelProperty(name = "setTime",value = "注册时间",required = false,dataType = "Date")
     private Date setTime;

@@ -1,5 +1,7 @@
 package com.polymeric.dao.merchants;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
@@ -37,4 +39,8 @@ public interface MerchantsUserDao extends BaseMapper<MerchantsUserEntity>{
 			"</if>" +
 			"</script>")
 	List<MerchantsUserEntity> selectAll(@Param("entity") MerchantsUserEntity entity);
+	
+	@Select("select * from merchants_user kyc_state where kyc_state = #{kycState}")
+	List<MerchantsUserEntity> findKycState(@Param("kycState") Integer kycState);
+
 }

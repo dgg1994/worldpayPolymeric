@@ -12,19 +12,22 @@ import java.util.List;
  *
  */
 public enum KycStateEnums {
-	WAIT_APPROVE(1, "待认证"),
-	PROCESS_APPROVE(2, "认证中"),
-	SUCCESS_APPROVE(3, "认证成功"),
-	ERROR_APPROVE(4, "认证失败");
+	WAIT_APPROVE(1, "待认证","waiting"),
+	PROCESS_APPROVE(2, "认证中","wait_audit"),
+	SUCCESS_APPROVE(3, "认证成功","success"),
+	ERROR_APPROVE(4, "认证失败","fail");
 	
 	private Integer index;
 
 	private String name;
+	
+	private String lable;
 
 
-	private KycStateEnums(Integer index, String name) {
+	private KycStateEnums(Integer index, String name, String lable) {
 	    this.index = index;
 	    this.name = name;
+	    this.lable = lable;
 	}
 
 
@@ -68,4 +71,14 @@ public enum KycStateEnums {
 		}
 		return list;
 	}
+
+	public String getLable() {
+		return lable;
+	}
+
+
+	public void setLable(String lable) {
+		this.lable = lable;
+	}
+
 }
