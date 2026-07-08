@@ -47,8 +47,13 @@ public class TestApiServiceImpl extends BaseApiService implements TestApiService
 			if(keyEntity == null) {
 				return setResultError("商户不存在");
 			}
-			ResponseBase base = this.postData(query,keyEntity);
-			return base;
+			if("post".equals(query.getQueryType())) {
+				ResponseBase base = this.postData(query,keyEntity);
+				return base;
+			}else {
+				ResponseBase base = this.getData(query,keyEntity);
+				return base;
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException();
@@ -60,6 +65,7 @@ public class TestApiServiceImpl extends BaseApiService implements TestApiService
 	
 	public ResponseBase postData(TestQuery query, MerchantsKeyEntity keyEntity) {
         try {
+        	System.out.println("商户测试请求接口："+query.getUrl());
         	System.out.println("商户测试请求接口："+query.getUrl());
             String nonce = generateNonce();
             String timestamp = String.valueOf(System.currentTimeMillis());
@@ -77,6 +83,7 @@ public class TestApiServiceImpl extends BaseApiService implements TestApiService
             String dataStr = httpRequest
                     .timeout(30000)
                     .body(JSON.toJSONString(query.getData()))
+                    .body(JSON.toJSONString(query.getData()))
                     .charset(StandardCharsets.UTF_8)
                     .setConnectionTimeout(5000)
                     .execute()
@@ -90,6 +97,42 @@ public class TestApiServiceImpl extends BaseApiService implements TestApiService
                     "系统异常：" + e.getMessage(), null);
         }
     }
+	
+	
+	
+	public ResponseBase getData(TestQuery query, MerchantsKeyEntity keyEntity) {
+        try {
+        	System.out.println("商户测试请求接口："+query.getUrl());
+            String nonce = generateNonce();
+            String timestamp = String.valueOf(System.currentTimeMillis());
+            String sign = RsaSignUtil.signRequest(query.getAppid(),nonce,timestamp,JSON.toJSONString(query), keyEntity.getPrivateKey());
+            // 3. 构建HTTP请求
+            HttpRequest httpRequest = HttpRequest.get(query.getUrl())
+                    .header("appId", query.getAppid())
+                    .header("nonce", nonce)
+                    .header("timestamp", timestamp)
+                    .header("sign", sign);
+            if (!Strings.isNullOrEmpty(query.getUid())) {
+	           	 httpRequest.header("uId", query.getUid());
+	           }
+            // 4. 发送请求
+            String dataStr = httpRequest
+                    .timeout(30000)
+                    .charset(StandardCharsets.UTF_8)
+                    .setConnectionTimeout(5000)
+                    .execute()
+                    .body();
+            // 5. 解析响应
+            ResponseBase base = JSONObject.parseObject(dataStr, ResponseBase.class);
+            return base;
+			
+        } catch (Exception e) {
+            return setResult(Constants.HTTP_RES_CODE_500,
+                    "系统异常：" + e.getMessage(), null);
+        }
+    }
+	
+	
 	
     private static String generateNonce() {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

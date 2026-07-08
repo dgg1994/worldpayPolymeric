@@ -7,6 +7,8 @@ public class TestQuery {
 	
 	private String url;
 	
+	private String queryType;
+	
 	private String appid;
 	
 	private String uid;
