@@ -2,7 +2,6 @@ package com.polymeric.service.admin.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.polymeric.base.ResponseBase;
 import com.polymeric.constants.Constants;
@@ -14,16 +13,9 @@ import com.polymeric.dao.order.OrderMchCashFlowDao;
 import com.polymeric.entity.finance.FinanceAddressEntity;
 import com.polymeric.entity.finance.FinanceRechargeRecordEntity;
 import com.polymeric.entity.merchants.MerchantsInfoEntity;
-import com.polymeric.entity.merchants.MerchantsUserEntity;
 import com.polymeric.entity.merchants.MerchantsWebHookMsgEntity;
 import com.polymeric.entity.order.OrderMchCashFlowEntity;
-import com.polymeric.enums.OrderStatusEnum;
-import com.polymeric.enums.OrderTypeEnum;
-import com.polymeric.enums.TxStatusEnums;
-import com.polymeric.enums.UniversalEnums;
-import com.polymeric.enums.UserStateEnums;
-import com.polymeric.enums.WebHookStateEnum;
-import com.polymeric.enums.WebhookPoloTypeEnums;
+import com.polymeric.enums.*;
 import com.polymeric.query.webhook.WebhookQuery;
 import com.polymeric.service.admin.FinanceService;
 import com.polymeric.service.api.impl.ApiMchWebhook;
@@ -31,8 +23,6 @@ import com.polymeric.utils.GenericityUtil;
 import com.polymeric.utils.OrderCodeFactory;
 import com.polymeric.utils.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jsqlparser.parser.Token;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -121,12 +111,13 @@ public class FinanceServiceImpl implements FinanceService {
 
     @Override
     public ResponseBase recordList(@RequestBody FinanceRechargeRecordEntity entity) {
-        PageHelper.startPage(entity.getPageNumber(), entity.getPageSize());
         if (!tokenUtils.isAdmin()){
             entity.setMerchantId(String.valueOf(tokenUtils.getMerchantId()));
         }
         List<FinanceRechargeRecordEntity> list = financeRechargeRecordDao.selectAll(entity);
-        PageInfo<FinanceRechargeRecordEntity> info = new PageInfo<>(list);
+        List<FinanceRechargeRecordEntity> pageList = GenericityUtil.Page(list, entity.getPageNumber(), entity.getPageSize());
+        PageInfo<FinanceRechargeRecordEntity> info = new PageInfo<>(pageList);
+        info.setTotal(list.size());
         return setResultSuccess(info, Constants.SUCCESS);
     }
 
@@ -136,12 +127,12 @@ public class FinanceServiceImpl implements FinanceService {
         String merchantId = financeRechargeRecordEntity.getMerchantId();
         if (status.equals(TxStatusEnums.SUCCESS.getIndex())){
             // 修改商户信息
-            QueryWrapper<MerchantsInfoEntity> wrapper = new QueryWrapper<>();
-            wrapper.eq("id",merchantId);
-            wrapper.eq("merchants_status", UserStateEnums.NORMAL.getIndex());
-            MerchantsInfoEntity merchantsInfoEntity = merchantsInfoDao.selectOne(wrapper);
+            MerchantsInfoEntity merchantsInfoEntity = merchantsInfoDao.selectById(merchantId);
             if (merchantsInfoEntity == null){
                 return setResultError("商户信息不存在，审核失败");
+            }
+            if (!merchantsInfoEntity.getMerchantsStatus().equals(UserStateEnums.NORMAL.getIndex())){
+                return setResultError("商户已冻结，审核失败");
             }
             //修改商户余额
             BigDecimal beforeAmount = merchantsInfoEntity.getAvailableAmount() == null ? BigDecimal.ZERO : merchantsInfoEntity.getAvailableAmount();
