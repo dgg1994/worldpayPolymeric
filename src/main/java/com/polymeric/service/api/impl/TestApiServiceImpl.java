@@ -47,6 +47,9 @@ public class TestApiServiceImpl extends BaseApiService implements TestApiService
 			if(keyEntity == null) {
 				return setResultError("商户不存在");
 			}
+			if(query.getUid().isEmpty()) {
+				query.setUid(null);
+			}
 			if("post".equals(query.getQueryType())) {
 				ResponseBase base = this.postData(query,keyEntity);
 				return base;
