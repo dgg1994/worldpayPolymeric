@@ -34,6 +34,9 @@ public interface MerchantsUserDao extends BaseMapper<MerchantsUserEntity>{
 			"<if test='entity.mchId != null'>" +
 			"and mu.mch_id = #{entity.mchId} " +
 			"</if>" +
+			"<if test='entity.mchAppid != null'>" +
+			"and mu.mch_appid = #{entity.mchAppid} " +
+			"</if>" +
 			"<if test='entity.merchantsName != null'>" +
 			"and mi.merchants_namme = #{entity.merchantsName} " +
 			"</if>" +

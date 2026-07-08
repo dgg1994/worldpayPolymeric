@@ -39,6 +39,7 @@ public interface MerchantsCardDao extends BaseMapper<MerchantsCardEntity>{
 			"  <if test='entity.cardBrand != null and entity.cardBrand != \"\"'> AND mc.card_brand = #{entity.cardBrand} </if>" +
 			"  <if test='entity.cardState != null'> AND mc.card_state = #{entity.cardState} </if>" +
 			"  <if test='entity.ccy != null and entity.ccy != \"\"'> AND mc.ccy = #{entity.ccy} </if>" +
+			"  <if test='entity.mchAppid != null and entity.mchAppid != \"\"'> AND mc.mch_appid = #{entity.mchAppid} </if>" +
 			"  <if test='entity.mchName != null and entity.mchName != \"\"'> AND mi.merchants_namme LIKE CONCAT('%', #{entity.mchName}, '%') </if>" +
 			"  <if test='entity.mchId != null and entity.mchId != \"\"'> AND mc.mch_id = #{entity.mchId}  </if>" +
 			"</where>" +
