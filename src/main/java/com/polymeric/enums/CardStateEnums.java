@@ -1,5 +1,10 @@
 package com.polymeric.enums;
 
+import com.polymeric.entity.system.DicEntity;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @category 卡状态
  * @author Hlin
@@ -50,6 +55,28 @@ public enum CardStateEnums {
     
     public void setName(String name) {
         this.name = name;
+    }
+
+    public static String getName(int i) {
+        CardStateEnums[] webhookPoloTypeEnums = values();
+        for (CardStateEnums typeEnums : webhookPoloTypeEnums) {
+            if (typeEnums.getIndex().equals(i)) {
+                return typeEnums.getName();
+            }
+        }
+        return null;
+    }
+
+    public static List<DicEntity> getList() {
+        CardStateEnums[] typeEnums = values();
+        List<DicEntity> list = new ArrayList<>();
+        for (CardStateEnums typeEnum : typeEnums) {
+            DicEntity dicEntity = new DicEntity();
+            dicEntity.setId(typeEnum.getIndex());
+            dicEntity.setName(typeEnum.getName());
+            list.add(dicEntity);
+        }
+        return list;
     }
     
 }

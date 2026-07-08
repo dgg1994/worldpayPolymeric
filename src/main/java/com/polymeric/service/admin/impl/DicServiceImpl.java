@@ -74,5 +74,19 @@ public class DicServiceImpl extends BaseApiService implements DicService{
 		return setResultSuccess(list, I18nUtil.getMessage("base_success"));
 	}
 
+	@Override
+	@SysLogAnnotation(module = "字典管理", type = "get", remark = "查询回调类型")
+	public ResponseBase findWebhookPoloType() {
+		List<DicEntity> list = WebhookPoloTypeEnums.getList();
+		return setResultSuccess(list, I18nUtil.getMessage("base_success"));
+	}
+
+	@Override
+	@SysLogAnnotation(module = "字典管理", type = "get", remark = "查询银行卡状态")
+	public ResponseBase findCardState() {
+		List<DicEntity> list = CardStateEnums.getList();
+		return setResultSuccess(list, I18nUtil.getMessage("base_success"));
+	}
+
 
 }

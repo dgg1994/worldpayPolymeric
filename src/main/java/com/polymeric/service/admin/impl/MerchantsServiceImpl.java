@@ -182,6 +182,10 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
 			if (merchantsStatus != null){
 				wrapper.eq("merchants_status",merchantsStatus);
 			}
+			String appId = entity.getAppId();
+			if (StringUtils.isNotBlank(appId)){
+				wrapper.eq("app_id",appId);
+			}
 			wrapper.orderByDesc("setTime");
             if (!tokenUtils.isAdmin()) {
 				wrapper.eq("merchants_account",tokenUtils.getUsername());

@@ -50,6 +50,9 @@ public class MerchantsUserCardServiceImpl implements MerchantsUserCardService {
         if (entity.getCardType() != null){
             wrapper.eq("card_type",entity.getCardType());
         }
+        if (entity.getCardState() != null){
+            wrapper.eq("card_state",entity.getCardState());
+        }
         if (!tokenUtils.isAdmin()) {
             wrapper.eq("mch_id",tokenUtils.getMerchantId());
         }

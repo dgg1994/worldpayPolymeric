@@ -27,6 +27,7 @@ public interface MerchantsWebHookMsgDao extends BaseMapper<MerchantsWebHookMsgEn
 			+ "select * from merchants_webhook_msg where  1=1"
 			+ "<if test ='mchAppid != null'> and mch_appid = #{mchAppid}</if>"
 			+ "<if test ='status != null'> and status = #{status}</if>"
+			+ "<if test ='msgType != null'> and msg_type = #{msgType}</if>"
 			+ "<if test = 'startTime != null'> and DATE_FORMAT(setTime, '%Y-%m-%d') &gt;= #{startTime}</if> "
 			+ "<if test = 'endTime != null'> and DATE_FORMAT(setTime, '%Y-%m-%d') &lt;= #{endTime}</if> "
 			+ " order by setTime desc"

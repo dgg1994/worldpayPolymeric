@@ -43,6 +43,15 @@ public interface DicService {
 	@GetMapping("/findOrderType")
 	@ApiOperation(value = "查询订单交易类型",notes = "查询订单交易类型",response = ResponseBase.class)
 	ResponseBase findOrderType();
+
+	@GetMapping("/findWebhookPoloType")
+	@ApiOperation(value = "查询商户回调类型",notes = "查询商户回调类型",response = ResponseBase.class)
+	ResponseBase findWebhookPoloType();
+
+	@GetMapping("/findCardState")
+	@ApiOperation(value = "查询银行卡状态",notes = "查询银行卡状态",response = ResponseBase.class)
+	ResponseBase findCardState();
+
 	
 
 }

@@ -1,17 +1,5 @@
 package com.polymeric.service.admin.impl;
 
-import java.util.Date;
-import java.util.List;
-
-import com.polymeric.utils.TokenUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.polymeric.base.BaseApiService;
@@ -21,16 +9,18 @@ import com.polymeric.dao.merchants.MerchantsInfoDao;
 import com.polymeric.dao.merchants.MerchantsKeyDao;
 import com.polymeric.dao.merchants.MerchantsWebHookMsgDao;
 import com.polymeric.entity.merchants.MerchantsInfoEntity;
-import com.polymeric.entity.merchants.MerchantsKeyEntity;
 import com.polymeric.entity.merchants.MerchantsWebHookMsgEntity;
 import com.polymeric.enums.WebHookStateEnum;
-import com.polymeric.response.pub.ApiResponseEntity;
 import com.polymeric.service.admin.MerchantsWebHookMsgService;
 import com.polymeric.service.api.impl.ApiMchWebhook;
-import com.polymeric.utils.CallbackHttpSendUtil;
-import com.polymeric.utils.sign.RsaSignUtil;
+import com.polymeric.utils.TokenUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import lombok.Synchronized;
+import java.util.List;
 
 @RestController
 @Transactional
@@ -92,7 +82,7 @@ public class MerchantsWebHookMsgServiceImpl extends BaseApiService implements Me
 			return setResultError(Constants.ERROR);
 		} catch (Exception e) {
 			e.printStackTrace();
-	        throw new RuntimeException();
+	        return setResultError(Constants.ERROR);
 		}
 	}
 	

@@ -88,4 +88,8 @@ public class OrderMchCashFlowEntity extends PageQueryHelperEntity{
 	@ApiModelProperty(name = "gmtModified",value = "更新时间",required = false,dataType = "Date")
 	private Date gmtModified;
 
+	@TableField(exist = false)
+	@ApiModelProperty(name = "mchName",value = "商户名称",required = false,dataType = "String")
+	private String mchName;
+
 }

@@ -1,13 +1,12 @@
 package com.polymeric.service.admin.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.polymeric.base.ResponseBase;
 import com.polymeric.constants.Constants;
 import com.polymeric.dao.order.OrderMchCashFlowDao;
 import com.polymeric.entity.order.OrderMchCashFlowEntity;
 import com.polymeric.service.admin.OrderMchCashFlowService;
+import com.polymeric.utils.GenericityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -37,39 +36,13 @@ public class OrderMchCashFlowServiceImpl implements OrderMchCashFlowService {
 
     @Override
     public ResponseBase findList(@RequestBody OrderMchCashFlowEntity entity) {
-        PageHelper.startPage(entity.getPageNumber(), entity.getPageSize());
-        QueryWrapper<OrderMchCashFlowEntity> wrapper = new QueryWrapper<>();
-        if (entity.getMchId() != null){
-            wrapper.eq("mch_id",entity.getMchId());
-        }
-        if (entity.getMchAppid() != null){
-            wrapper.eq("mch_appid",entity.getMchAppid());
-        }
-        if (entity.getMchOrderNum() != null){
-            wrapper.eq("mch_order_num",entity.getMchOrderNum());
-        }
-        if (entity.getOrderNum() != null){
-            wrapper.eq("order_num",entity.getOrderNum());
-        }
-        if (entity.getOrderState() != null){
-            wrapper.eq("order_state",entity.getOrderState());
-        }
-        if (entity.getOrderType() != null){
-            wrapper.eq("order_type",entity.getOrderType());
-        }
-        if (entity.getTradeType() != null){
-            wrapper.eq("trade_type",entity.getTradeType());
-        }
-        if (entity.getStartTime() != null && entity.getEndTime() != null){
-            wrapper.ge("setTime",entity.getStartTime());
-            wrapper.le("setTime",entity.getEndTime());
-        }
-        wrapper.orderByDesc("setTime");
-        List<OrderMchCashFlowEntity> list = orderMchCashFlowDao.selectList(wrapper);
+        List<OrderMchCashFlowEntity> list = orderMchCashFlowDao.selectAll(entity);
         if (list == null){
             list = new ArrayList<>();
         }
-        PageInfo<OrderMchCashFlowEntity> info = new PageInfo<>(list);
+        List<OrderMchCashFlowEntity> pageList = GenericityUtil.Page(list, entity.getPageNumber(), entity.getPageSize());
+        PageInfo<OrderMchCashFlowEntity> info = new PageInfo<>(pageList);
+        info.setTotal(list.size());
         return setResultSuccess(info, Constants.SUCCESS);
     }
 

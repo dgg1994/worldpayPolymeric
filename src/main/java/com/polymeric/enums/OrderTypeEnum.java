@@ -60,6 +60,7 @@ public enum OrderTypeEnum {
             DicEntity dicEntity = new DicEntity();
             dicEntity.setId(typeEnum.getCode());
             dicEntity.setName(typeEnum.getName());
+            dicEntity.setLable(typeEnum.getLable().toString());
             list.add(dicEntity);
         }
         return list;

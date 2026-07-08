@@ -1,5 +1,10 @@
 package com.polymeric.enums;
 
+import com.polymeric.entity.system.DicEntity;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @category polo 回调类型
  * @author Hlin
@@ -58,5 +63,17 @@ public enum WebhookPoloTypeEnums {
             }
         }
         return null;
+    }
+
+    public static List<DicEntity> getList() {
+        WebhookPoloTypeEnums[] typeEnums = values();
+        List<DicEntity> list = new ArrayList<>();
+        for (WebhookPoloTypeEnums typeEnum : typeEnums) {
+            DicEntity dicEntity = new DicEntity();
+            dicEntity.setId(typeEnum.getIndex());
+            dicEntity.setName(typeEnum.getName());
+            list.add(dicEntity);
+        }
+        return list;
     }
 }
