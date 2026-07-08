@@ -20,7 +20,6 @@ import com.polymeric.dao.merchants.MerchantsKeyDao;
 import com.polymeric.entity.merchants.MerchantsKeyEntity;
 import com.polymeric.query.api.TestQuery;
 import com.polymeric.query.webhook.WebhookQuery;
-import com.polymeric.response.pub.ApiResponseEntity;
 import com.polymeric.service.api.TestApiService;
 import com.polymeric.utils.sign.RsaSignUtil;
 
@@ -35,9 +34,9 @@ public class TestApiServiceImpl extends BaseApiService implements TestApiService
 	private MerchantsKeyDao merchantsKeyDao;
 
 	@Override
-	public ApiResponseEntity webHookTest(@RequestBody WebhookQuery query) {
+	public ResponseBase webHookTest(@RequestBody WebhookQuery query) {
 		System.out.println("商户收到回调："+JSON.toJSONString(query));
-		return ApiResponseEntity.success();
+		return setResultSuccess();
 	}
 
 	@Override
