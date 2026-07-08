@@ -7,6 +7,7 @@ import com.polymeric.dao.order.OrderMchCashFlowDao;
 import com.polymeric.entity.order.OrderMchCashFlowEntity;
 import com.polymeric.service.admin.OrderMchCashFlowService;
 import com.polymeric.utils.GenericityUtil;
+import com.polymeric.utils.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -34,8 +35,14 @@ public class OrderMchCashFlowServiceImpl implements OrderMchCashFlowService {
     @Resource
     private OrderMchCashFlowDao orderMchCashFlowDao;
 
+    @Resource
+    private TokenUtils tokenUtils;
+
     @Override
     public ResponseBase findList(@RequestBody OrderMchCashFlowEntity entity) {
+        if (!tokenUtils.isAdmin()){
+            entity.setMchAppid(tokenUtils.getMerchantAppId());
+        }
         List<OrderMchCashFlowEntity> list = orderMchCashFlowDao.selectAll(entity);
         if (list == null){
             list = new ArrayList<>();

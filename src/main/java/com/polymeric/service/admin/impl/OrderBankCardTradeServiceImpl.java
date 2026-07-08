@@ -8,6 +8,7 @@ import com.polymeric.constants.Constants;
 import com.polymeric.dao.order.OrderBankCardTradeDao;
 import com.polymeric.entity.order.OrderBankCardTradeEntity;
 import com.polymeric.service.admin.OrderBankCardTradeService;
+import com.polymeric.utils.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -35,9 +36,15 @@ public class OrderBankCardTradeServiceImpl implements OrderBankCardTradeService 
     @Resource
     private OrderBankCardTradeDao orderBankCardTradeDao;
 
+    @Resource
+    private TokenUtils tokenUtils;
+
     @Override
     public ResponseBase findList(@RequestBody OrderBankCardTradeEntity entity) {
         PageHelper.startPage(entity.getPageNumber(), entity.getPageSize());
+        if (!tokenUtils.isAdmin()){
+            entity.setMchAppid(tokenUtils.getMerchantAppId());
+        }
         QueryWrapper<OrderBankCardTradeEntity> wrapper = new QueryWrapper<>();
         if (entity.getUserUid() != null){
             wrapper.eq("user_uid",entity.getUserUid());
