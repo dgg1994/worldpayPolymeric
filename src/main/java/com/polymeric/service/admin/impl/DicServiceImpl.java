@@ -47,6 +47,12 @@ public class DicServiceImpl extends BaseApiService implements DicService{
 	}
 
 	@Override
+	public ResponseBase findCardType() {
+		List<DicEntity> list = CardTypeEnums.getList();
+		return setResultSuccess(list, I18nUtil.getMessage("base_success"));
+	}
+
+	@Override
 	@SysLogAnnotation(module = "字典管理", type = "get", remark = "查询订单状态")
 	public ResponseBase findOrderState() {
 		List<DicEntity> list = OrderStatusEnum.getList();

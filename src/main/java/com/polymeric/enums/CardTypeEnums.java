@@ -1,5 +1,10 @@
 package com.polymeric.enums;
 
+import com.polymeric.entity.system.DicEntity;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @category 卡类型
  * @author Hlin
@@ -42,6 +47,28 @@ public enum CardTypeEnums {
     
     public void setName(String name) {
         this.name = name;
+    }
+
+    public static String getName(int i) {
+        CardTypeEnums[] cardTypeEnums = values();
+        for (CardTypeEnums typeEnums : cardTypeEnums) {
+            if (typeEnums.getIndex().equals(i)) {
+                return typeEnums.getName();
+            }
+        }
+        return null;
+    }
+
+    public static List<DicEntity> getList() {
+        CardTypeEnums[] typeEnums = values();
+        List<DicEntity> list = new ArrayList<>();
+        for (CardTypeEnums typeEnum : typeEnums) {
+            DicEntity dicEntity = new DicEntity();
+            dicEntity.setId(typeEnum.getIndex());
+            dicEntity.setName(typeEnum.getCode());
+            list.add(dicEntity);
+        }
+        return list;
     }
     
 }

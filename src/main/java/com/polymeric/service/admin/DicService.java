@@ -27,6 +27,10 @@ public interface DicService {
 	@GetMapping("/findDeviceType")
 	@ApiOperation(value = "查询设备类型",notes = "查询设备类型",response = ResponseBase.class)
 	ResponseBase findDeviceType();
+
+	@GetMapping("/findCardType")
+	@ApiOperation(value = "查询卡片类型",notes = "查询卡片类型",response = ResponseBase.class)
+	ResponseBase findCardType();
 	
 	@GetMapping("/findOrderState")
 	@ApiOperation(value = "查询订单状态",notes = "查询订单状态",response = ResponseBase.class)

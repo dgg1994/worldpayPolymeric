@@ -43,7 +43,7 @@ public class OrderIncomeListServiceImpl implements OrderIncomeListService {
             wrapper.eq("card_id",entity.getCardId());
         }
         if (entity.getCardType() != null){
-            wrapper.eq("cardType",entity.getCardType());
+            wrapper.eq("card_type",entity.getCardType());
         }
         if (entity.getChannelId() != null){
             wrapper.eq("channel_id",entity.getChannelId());

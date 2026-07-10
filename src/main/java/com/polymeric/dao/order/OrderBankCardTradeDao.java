@@ -32,4 +32,36 @@ public interface OrderBankCardTradeDao extends BaseMapper<OrderBankCardTradeEnti
 	@Select("select * from order_bankcard_trade_list where order_num = #{orderNum}")
 	OrderBankCardTradeEntity findOrderNum(@Param("orderNum") String orderNum);
 
+	@Select("<script>" +
+			"SELECT * FROM order_bankcard_trade_list" +
+			"<where>" +
+			"   <if test='entity.userUid != null'>" +
+			"       AND user_uid = #{entity.userUid}" +
+			"   </if>" +
+			"   <if test='entity.userBankcardId != null'>" +
+			"       AND user_bankcard_id = #{entity.userBankcardId}" +
+			"   </if>" +
+			"   <if test='entity.mchAppid != null'>" +
+			"       AND mch_appid = #{entity.mchAppid}" +
+			"   </if>" +
+			"   <if test='entity.mchOrderNum != null'>" +
+			"       AND mch_order_num = #{entity.mchOrderNum}" +
+			"   </if>" +
+			"   <if test='entity.orderNum != null'>" +
+			"       AND order_num = #{entity.orderNum}" +
+			"   </if>" +
+			"   <if test='entity.orderState != null'>" +
+			"       AND order_state = #{entity.orderState}" +
+			"   </if>" +
+			"   <if test='entity.tradeType != null'>" +
+			"       AND trade_type = #{entity.tradeType}" +
+			"   </if>" +
+			"   <if test='entity.startTime != null and entity.endTime != null'>" +
+			"       AND setTime &gt;= #{entity.startTime}" +
+			"       AND setTime &lt;= #{entity.endTime}" +
+			"   </if>" +
+			"</where>" +
+			" ORDER BY setTime DESC" +
+			"</script>")
+    List<OrderBankCardTradeEntity> selectAll(@Param("entity") OrderBankCardTradeEntity entity);
 }
