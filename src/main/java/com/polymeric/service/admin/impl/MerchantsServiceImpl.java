@@ -81,7 +81,7 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
 	private FinanceAddressDao financeAddressDao; ;
 	
 	@Autowired
-	SysUserDao sysUserDao;
+	private SysUserDao sysUserDao;
 	
 	@Autowired
 	private SysRoleDao sysRoleDao;
@@ -216,6 +216,10 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
 			if(entity != null) {
 				entity.setMerchantsStatus(merchantsStatus);
 				merchantsInfoDao.updateById(entity);
+				//修改sys_user表中的用户状态
+				SysUserEntity sysUserEntity = sysUserDao.selectOne(new QueryWrapper<SysUserEntity>().eq("id", entity.getSysAccountId()));
+				sysUserEntity.setUserState(merchantsStatus);
+				sysUserDao.updateById(sysUserEntity);
 				return setResultSuccess();
 			}
 			return setResultError(Constants.ERROR);
