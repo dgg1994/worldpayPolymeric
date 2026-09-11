@@ -376,7 +376,7 @@ public class ApiBankCardServiceImpl extends BaseApiService implements ApiBankCar
 					PoloConfig.APP_ID,
 					PoloConfig.RSA_PRIVATE_KEY, 
 					PoloConfig.AES_KEY, 
-					PoloMethods.BANKCARD_ACTIVE);
+					PoloMethods.BANKCARD_SETPIN);
 			if (infoEntity.getMerchantsUserData() == null) {
 				return setResultError(ErrorCodeEnum.UID_NULL.getCode(), I18nUtil.getMessage("uid_null"));
 			}

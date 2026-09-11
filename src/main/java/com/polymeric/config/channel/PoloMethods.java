@@ -31,6 +31,9 @@ public interface PoloMethods {
     
     //银行卡激活
     public static String BANKCARD_ACTIVE= "/bankcard/active";
+
+    // 设置pin
+    public static String BANKCARD_SETPIN = "/bankcard/setPin";
     
     //查询银行卡余额
     public static String BANKCARD_BALANCE= "/bankcard/balance";
