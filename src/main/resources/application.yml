@@ -24,7 +24,7 @@ spring:
     #url: jdbc:mysql://16.163.6.237:3306/worldpay_polymeric?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
     url: jdbc:mysql://127.0.0.1:3306/worldpay_polymeric?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
     username: worldpay_polymeric
-    password: m7sw4zsJSjemDPZa
+    password: XHRPiDbnrreeNbFE
     type: com.alibaba.druid.pool.DruidDataSource
     initialSize: 30
     minIdle: 30
