@@ -280,16 +280,22 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
             List<Integer> incomingChannelCardIds = CollectionUtils.isEmpty(channelCardsId)
                     ? Collections.emptyList() : channelCardsId;
 
-            if (merchantsInfoEntity.getChannelId() == null) {
-                //更新上游id和编码到商户表
+            // 首次绑定 / 更换上游：都更新商户表上游信息
+            Integer oldChannelId = merchantsInfoEntity.getChannelId();
+            boolean channelChanged = oldChannelId == null || !oldChannelId.equals(channelInfoEntity.getId());
+            if (channelChanged) {
                 merchantsInfoEntity.setChannelId(channelInfoEntity.getId());
                 merchantsInfoEntity.setChannelCode(channelInfoEntity.getChannelCode());
                 merchantsInfoEntity.setGmtModified(new Date());
                 merchantsInfoDao.updateById(merchantsInfoEntity);
+            }
+
+            if (oldChannelId == null) {
                 if (!incomingChannelCardIds.isEmpty()) {
                     addMerchantsCard(incomingChannelCardIds, merchantsInfoEntity, channelInfoEntity);
                 }
             } else {
+                // 同上游增减 / 换上游：同步商户产品（多增少禁，已禁用再选则恢复）
                 syncMerchantsCards(incomingChannelCardIds, merchantsInfoEntity, channelInfoEntity);
             }
 
@@ -308,7 +314,9 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
 	                                MerchantsInfoEntity merchantsInfoEntity,
 	                                ChannelInfoEntity channelInfoEntity) throws InvocationTargetException, IllegalAccessException {
 		Set<Integer> incomingSet = new HashSet<>(channelCardsId);
-		List<MerchantsCardEntity> existingCards = merchantsCardDao.selectListAll(merchantsInfoEntity.getId());
+		// 必须查全量（含已禁用），否则换绑/重选时无法恢复，会重复插入
+		List<MerchantsCardEntity> existingCards = merchantsCardDao.selectList(
+				new QueryWrapper<MerchantsCardEntity>().eq("mch_id", merchantsInfoEntity.getId()));
 		Map<Integer, MerchantsCardEntity> existingByChannelCardId = new HashMap<>();
 		if (!CollectionUtils.isEmpty(existingCards)) {
 			for (MerchantsCardEntity card : existingCards) {
@@ -329,6 +337,8 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
 				MerchantsCardEntity restoreEntity = new MerchantsCardEntity();
 				restoreEntity.setId(existing.getId());
 				restoreEntity.setCardState(MerchantsCardStateEnums.NORMAL.getIndex());
+				restoreEntity.setChannelId(channelInfoEntity.getId());
+				restoreEntity.setChannelCode(channelInfoEntity.getChannelCode());
 				merchantsCardDao.updateById(restoreEntity);
 			}
 		}
@@ -349,7 +359,8 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
 			}
 			UpdateWrapper<MerchantsCardEntity> updateWrapper = new UpdateWrapper<>();
 			updateWrapper.eq("id", existing.getId())
-					.set("card_state", MerchantsCardStateEnums.DISABLE.getIndex());
+					.set("card_state", MerchantsCardStateEnums.DISABLE.getIndex())
+					.set("gmt_modified", new Date());
 			merchantsCardDao.update(null, updateWrapper);
 		}
 	}

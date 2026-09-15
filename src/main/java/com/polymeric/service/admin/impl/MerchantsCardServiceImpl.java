@@ -85,7 +85,9 @@ public class MerchantsCardServiceImpl implements MerchantsCardService {
             }
             if (merchantsStatus == 1 && merchantsCardEntity.getCardState() == 2){
                 //说明要上架查询上游卡状态
-                ChannelCardEntity channelCardEntity = channelCardDao.selectOne(new QueryWrapper<ChannelCardEntity>().eq("card_id", merchantsCardEntity.getCardId()));
+                ChannelCardEntity channelCardEntity = channelCardDao.selectOne(new QueryWrapper<ChannelCardEntity>()
+                        .eq("card_id", merchantsCardEntity.getCardId())
+                        .eq("channel_code",merchantsCardEntity.getChannelCode()));
                 if (channelCardEntity != null && channelCardEntity.getCardState() == 2){
                     return setResultError("上游卡已下架，请确认信息");
                 }
