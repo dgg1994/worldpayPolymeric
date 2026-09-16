@@ -98,8 +98,7 @@ public class ApiBankCardServiceImpl extends BaseApiService implements ApiBankCar
                 return base;
             }
             MerchantsInfoEntity infoEntity = JSONObject.parseObject(JSON.toJSONString(base.getData()), MerchantsInfoEntity.class);
-            //if(ChannelCodeEnums.POLO.getCode().equals(infoEntity.getChannelCode())) {
-            if (infoEntity != null) {
+            if(ChannelCodeEnums.POLO.getCode().equals(infoEntity.getChannelCode())) {
                 return this.poloMerchantBankcardList(infoEntity);
             } else {
                 return setResultError(ErrorCodeEnum.CHANNEL_NULL.getCode(), I18nUtil.getMessage("channel_null"));

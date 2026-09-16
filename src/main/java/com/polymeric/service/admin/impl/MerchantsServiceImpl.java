@@ -280,15 +280,12 @@ public class MerchantsServiceImpl extends BaseApiService implements MerchantsSer
             List<Integer> incomingChannelCardIds = CollectionUtils.isEmpty(channelCardsId)
                     ? Collections.emptyList() : channelCardsId;
 
-            // 首次绑定 / 更换上游：都更新商户表上游信息
+            // 每次分配都同步商户表上游 id / code（含同渠道补绑产品、历史 code 为空）
             Integer oldChannelId = merchantsInfoEntity.getChannelId();
-            boolean channelChanged = oldChannelId == null || !oldChannelId.equals(channelInfoEntity.getId());
-            if (channelChanged) {
-                merchantsInfoEntity.setChannelId(channelInfoEntity.getId());
-                merchantsInfoEntity.setChannelCode(channelInfoEntity.getChannelCode());
-                merchantsInfoEntity.setGmtModified(new Date());
-                merchantsInfoDao.updateById(merchantsInfoEntity);
-            }
+            merchantsInfoEntity.setChannelId(channelInfoEntity.getId());
+            merchantsInfoEntity.setChannelCode(channelInfoEntity.getChannelCode());
+            merchantsInfoEntity.setGmtModified(new Date());
+            merchantsInfoDao.updateById(merchantsInfoEntity);
 
             if (oldChannelId == null) {
                 if (!incomingChannelCardIds.isEmpty()) {
